@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { GlassCard } from '@/components/ui/GlassCard'
-import { Button } from '@/components/ui/Button'
+import { GlassCard, Button } from '@/components/ui'
 import { supabase } from '@/lib/supabase'
 
 export default function VerifyEmailPage() {

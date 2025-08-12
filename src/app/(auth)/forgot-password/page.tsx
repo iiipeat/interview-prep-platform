@@ -3,10 +3,8 @@
 import { useState } from 'react'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { GlassCard } from '@/components/ui/GlassCard'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { resetPassword } from '@/lib/supabase'
+import { GlassCard, Button, Input } from '@/components/ui'
+import { supabase } from '@/lib/supabase'
 
 interface FormData {
   email: string
@@ -63,12 +61,14 @@ export default function ForgotPasswordPage() {
     setErrors({})
 
     try {
-      const result = await resetPassword(formData.email)
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`
+      })
 
-      if (result.success) {
+      if (!error) {
         setIsSubmitted(true)
       } else {
-        const errorMessage = result.error?.message || 'Password reset failed'
+        const errorMessage = error.message || 'Password reset failed'
         
         if (errorMessage.includes('not found') || errorMessage.includes('invalid')) {
           setErrors({ email: 'No account found with this email address' })

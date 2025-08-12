@@ -1,0 +1,418 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Glass Morphism Design System */
+:root {
+  /* Light theme colors */
+  --background: #fafbfc;
+  --foreground: #1a1d21;
+  --surface-light: rgba(255, 255, 255, 0.7);
+  --surface-medium: rgba(255, 255, 255, 0.5);
+  --surface-heavy: rgba(255, 255, 255, 0.9);
+  --border-light: rgba(255, 255, 255, 0.3);
+  --border-medium: rgba(255, 255, 255, 0.5);
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
+  --shadow-heavy: rgba(0, 0, 0, 0.15);
+  
+  /* Brand colors */
+  --primary-50: #f0f9ff;
+  --primary-100: #e0f2fe;
+  --primary-500: #0ea5e9;
+  --primary-600: #0284c7;
+  --primary-700: #0369a1;
+  --secondary-500: #8b5cf6;
+  --secondary-600: #7c3aed;
+  --accent-500: #06b6d4;
+  
+  /* Text colors */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0b0d;
+    --foreground: #f1f3f4;
+    --surface-light: rgba(255, 255, 255, 0.05);
+    --surface-medium: rgba(255, 255, 255, 0.1);
+    --surface-heavy: rgba(255, 255, 255, 0.15);
+    --border-light: rgba(255, 255, 255, 0.1);
+    --border-medium: rgba(255, 255, 255, 0.2);
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --shadow-medium: rgba(0, 0, 0, 0.3);
+    --shadow-heavy: rgba(0, 0, 0, 0.5);
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+  }
+}
+
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #f0f9ff 0%, #fafbfc 50%, #f3e8ff 100%);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  min-height: 100vh;
+  line-height: 1.6;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glass morphism utility classes */
+.glass-light {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glass-medium {
+  background: var(--surface-medium);
+  border: 1px solid var(--border-medium);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 
+    0 12px 40px var(--shadow-medium),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.glass-heavy {
+  background: var(--surface-heavy);
+  border: 1px solid var(--border-medium);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 
+    0 16px 48px var(--shadow-heavy),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Button hover states */
+.glass-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 20px 64px var(--shadow-medium),
+    inset 0 2px 0 rgba(255, 255, 255, 0.6);
+}
+
+.glass-button:active {
+  transform: translateY(0);
+}
+
+/* Input field styles */
+.glass-input {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  background: var(--surface-medium);
+  border-color: var(--primary-500);
+  box-shadow: 
+    0 0 0 3px rgba(14, 165, 233, 0.1),
+    0 8px 32px var(--shadow-light);
+  outline: none;
+}
+
+/* Gradient text utilities */
+.gradient-text-primary {
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-600) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-text-accent {
+  background: linear-gradient(135deg, var(--accent-500) 0%, var(--primary-500) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Animation utilities */
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.fade-in-down {
+  animation: fadeInDown 0.6s ease-out forwards;
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Scrollbar styling for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-medium);
+  border-radius: 3px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-heavy);
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(14, 165, 233, 0.2);
+  color: var(--text-primary);
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* Enhanced input styles for better visibility */
+.glass-input {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(156, 163, 175, 0.5) !important;
+  color: #111827 !important;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+.glass-input::placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+/* Better text contrast for glass cards */
+.glass-light p,
+.glass-medium p,
+.glass-heavy p {
+  color: #374151 !important;
+}
+
+.glass-light label,
+.glass-medium label,
+.glass-heavy label {
+  color: #1f2937 !important;
+  font-weight: 500 !important;
+}
+
+/* Force all text in onboarding modal to be black and visible */
+[data-onboarding] * {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+[data-onboarding] div {
+  color: #000000 !important;
+}
+
+[data-onboarding] h1,
+[data-onboarding] h2, 
+[data-onboarding] h3,
+[data-onboarding] h4,
+[data-onboarding] p,
+[data-onboarding] span {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* Ultra specific overrides for button text */
+[data-onboarding] button div {
+  color: #000000 !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+/* Override any possible Tailwind or other CSS */
+.fixed.inset-0 div[data-onboarding] * {
+  color: #000000 !important;
+}
+
+/* Ensure form text is visible */
+form label {
+  color: #1f2937 !important;
+  font-weight: 500 !important;
+}
+
+form p,
+form span {
+  color: #4b5563 !important;
+}
+
+/* Checkbox styles */
+input[type="checkbox"] {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #9ca3af;
+}
+
+input[type="checkbox"]:checked {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* Global fix for all input and textarea elements */
+input, textarea, select {
+  color: #111827 !important; /* Very dark gray for maximum readability */
+  font-weight: 500 !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #6b7280 !important; /* Medium gray for placeholders */
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+/* Ensure all text inputs have proper contrast */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #111827 !important;
+}
+
+
+/* CRITICAL TEXT VISIBILITY FIXES */
+/* Ensure all button text is visible */
+button {
+  color: #1f2937 \!important; /* Very dark gray */
+  font-weight: 500 \!important;
+}
+
+/* Gray background buttons need dark text */
+.bg-gray-100, .bg-gray-50, .bg-white {
+  color: #1f2937 \!important;
+}
+
+/* Ensure selected buttons keep their text color */
+.bg-blue-500, .bg-purple-500 {
+  color: white \!important;
+}
+
+/* Fix all text color classes to be darker */
+.text-gray-700 {
+  color: #374151 \!important;
+}
+
+.text-gray-600 {
+  color: #4b5563 \!important;
+}
+
+.text-gray-500 {
+  color: #6b7280 \!important;
+}
+
+/* Ensure button content is visible */
+button span, button div, button p {
+  opacity: 1 !important;
+}
+
+/* Primary button text must be white */
+button.bg-gradient-to-r span,
+button.bg-gradient-to-r div,
+button.bg-gradient-to-r p,
+button[class*="from-blue"] span,
+button[class*="from-blue"] div,
+button[class*="from-blue"] p {
+  color: white !important;
+  opacity: 1 !important;
+  z-index: 10;
+}
+
+/* Fix input and select text */
+input, textarea, select {
+  color: #111827 \!important;
+  font-weight: 500 \!important;
+}
+
+/* Fix placeholder text */
+input::placeholder, textarea::placeholder {
+  color: #6b7280 \!important;
+  opacity: 1 \!important;
+}
+
+/* Ensure all interactive elements have visible text */
+a, button, [role='button'] {
+  opacity: 1 \!important;
+}
+
+/* Fix nav items */
+nav a {
+  color: #374151 \!important;
+  font-weight: 500 \!important;
+}
+
+nav a:hover {
+  color: #111827 \!important;
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug OAuth URL</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Debug OAuth Redirect URL</h1>
+    <button onclick="testOAuth()">Test OAuth URL Generation</button>
+    <div id="result"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://cbohkxomfugalzhmvkmd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNib2hreG9tZnVnYWx6aG12a21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5ODgwMTUsImV4cCI6MjA3MDU2NDAxNX0.PA2_pI11rfUzi3c-M5fpaP4ciLwbWmn0ZBEL5PVhyFs';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function testOAuth() {
+            // This will show us the exact URL that Supabase generates
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: 'http://localhost:3000/dashboard',
+                    skipBrowserRedirect: true // This prevents actual redirect
+                }
+            });
+            
+            const resultDiv = document.getElementById('result');
+            
+            if (data?.url) {
+                // Parse the URL to find the redirect_uri parameter
+                const url = new URL(data.url);
+                const redirectUri = url.searchParams.get('redirect_uri');
+                
+                resultDiv.innerHTML = `
+                    <h2>OAuth URL Generated:</h2>
+                    <p><strong>Full URL:</strong></p>
+                    <textarea style="width: 100%; height: 100px;">${data.url}</textarea>
+                    
+                    <p><strong>Redirect URI being used:</strong></p>
+                    <div style="background: #f0f0f0; padding: 10px; word-break: break-all;">
+                        ${redirectUri || 'Not found'}
+                    </div>
+                    
+                    <h3>You need to add this EXACT redirect URI to Google Console:</h3>
+                    <div style="background: #ffffcc; padding: 10px; font-weight: bold; word-break: break-all;">
+                        ${redirectUri || 'Could not determine redirect URI'}
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = 'Error: ' + (error?.message || 'Unknown error');
+            }
+        }
+    </script>
+</body>
+</html>

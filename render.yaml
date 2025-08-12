@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: interview-prep-platform
+    runtime: node
+    region: oregon # You can change this to your preferred region
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false # Will be set in Render dashboard
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false # Will be set in Render dashboard
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false # Will be set in Render dashboard
+      - key: CLAUDE_API_KEY
+        sync: false # Will be set in Render dashboard
+      - key: STRIPE_SECRET_KEY
+        sync: false # Will be set in Render dashboard
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false # Will be set in Render dashboard
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false # Will be set in Render dashboard
+      - key: NEXTAUTH_URL
+        sync: false # Will be set to your Render URL
+      - key: NEXTAUTH_SECRET
+        generateValue: true # Render will generate a random secret

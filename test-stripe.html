@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Stripe Integration</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .plan { border: 2px solid #ddd; border-radius: 10px; padding: 20px; margin: 20px 0; }
+        .plan.recommended { border-color: #4285f4; background: #f0f8ff; }
+        button { background: #4285f4; color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 5px; width: 100%; margin-top: 10px; }
+        button:hover { background: #357ae8; }
+        .price { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .features { margin: 15px 0; }
+        .features li { margin: 5px 0; }
+        .error { background: #f8d7da; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .info { background: #d1ecf1; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>💳 Test Stripe Subscription Plans</h1>
+    
+    <div class="info">
+        <strong>Test Cards:</strong><br>
+        • Success: 4242 4242 4242 4242<br>
+        • Requires Auth: 4000 0025 0000 3155<br>
+        • Declined: 4000 0000 0000 0002<br>
+        Use any future date for expiry and any 3 digits for CVC
+    </div>
+
+    <div class="plan">
+        <h2>Weekly Plan</h2>
+        <div class="price">$5/week</div>
+        <div class="features">
+            <ul>
+                <li>20 questions per day</li>
+                <li>All industries</li>
+                <li>AI feedback</li>
+                <li>7-day free trial</li>
+            </ul>
+        </div>
+        <button onclick="subscribeWeekly()">Start 7-Day Free Trial</button>
+    </div>
+
+    <div class="plan recommended">
+        <h2>Monthly Unlimited ⭐ RECOMMENDED</h2>
+        <div class="price">$29/month</div>
+        <div class="features">
+            <ul>
+                <li>Unlimited questions</li>
+                <li>Practice Buddy access</li>
+                <li>Advanced AI feedback</li>
+                <li>Priority support</li>
+                <li>7-day free trial</li>
+            </ul>
+        </div>
+        <button onclick="subscribeMonthly()">Start 7-Day Free Trial</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        // You'll need to update these with your actual Stripe publishable key
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_YOUR_KEY_HERE';
+        
+        // Initialize Stripe
+        let stripe = null;
+        if (STRIPE_PUBLISHABLE_KEY && STRIPE_PUBLISHABLE_KEY !== 'pk_test_YOUR_KEY_HERE') {
+            stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        }
+        
+        async function subscribeWeekly() {
+            if (!stripe) {
+                alert('Please add your Stripe publishable key to this file first!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/payments/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        planType: 'weekly',
+                        successUrl: 'http://localhost:3000/dashboard',
+                        cancelUrl: 'http://localhost:3000/pricing'
+                    })
+                });
+                
+                const { sessionId, error } = await response.json();
+                
+                if (error) {
+                    document.getElementById('result').innerHTML = '<div class="error">Error: ' + error + '</div>';
+                    return;
+                }
+                
+                // Redirect to Stripe Checkout
+                const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+                
+                if (stripeError) {
+                    document.getElementById('result').innerHTML = '<div class="error">Error: ' + stripeError.message + '</div>';
+                }
+            } catch (err) {
+                document.getElementById('result').innerHTML = '<div class="error">Error: ' + err.message + '</div>';
+            }
+        }
+        
+        async function subscribeMonthly() {
+            if (!stripe) {
+                alert('Please add your Stripe publishable key to this file first!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/payments/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        planType: 'monthly',
+                        successUrl: 'http://localhost:3000/dashboard',
+                        cancelUrl: 'http://localhost:3000/pricing'
+                    })
+                });
+                
+                const { sessionId, error } = await response.json();
+                
+                if (error) {
+                    document.getElementById('result').innerHTML = '<div class="error">Error: ' + error + '</div>';
+                    return;
+                }
+                
+                // Redirect to Stripe Checkout
+                const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+                
+                if (stripeError) {
+                    document.getElementById('result').innerHTML = '<div class="error">Error: ' + stripeError.message + '</div>';
+                }
+            } catch (err) {
+                document.getElementById('result').innerHTML = '<div class="error">Error: ' + err.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>

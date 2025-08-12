@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Google OAuth</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        button { background: #4285f4; color: white; border: none; padding: 10px 20px; cursor: pointer; margin: 10px 0; }
+        .code { background: #f0f0f0; padding: 10px; word-break: break-all; font-family: monospace; }
+        .success { background: #d4edda; padding: 10px; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; padding: 10px; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; padding: 10px; border: 1px solid #ffeaae; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Google OAuth Configuration</h1>
+    
+    <div class="warning">
+        <strong>Instructions:</strong>
+        <ol>
+            <li>Click "Method 1" to test with Supabase OAuth</li>
+            <li>Look at the error page URL in your browser</li>
+            <li>Copy the redirect_uri from the error</li>
+            <li>Add it to Google Console</li>
+        </ol>
+    </div>
+
+    <h2>Method 1: Test Supabase OAuth (Recommended)</h2>
+    <button onclick="testSupabaseOAuth()">Test Supabase OAuth →</button>
+    
+    <h2>Method 2: Direct Google OAuth URL</h2>
+    <button onclick="testDirectOAuth()">Test Direct OAuth →</button>
+    
+    <h2>Method 3: Check Current Configuration</h2>
+    <button onclick="checkConfig()">Check Configuration</button>
+    
+    <div id="result"></div>
+
+    <h2>Common Redirect URIs to Add to Google Console:</h2>
+    <div class="code">
+        https://cbohkxomfugalzhmvkmd.supabase.co/auth/v1/callback<br>
+        http://localhost:3000<br>
+        http://localhost:3000/dashboard<br>
+        http://localhost:3000/auth/callback<br>
+        http://localhost:3000/auth/google/callback
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://cbohkxomfugalzhmvkmd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNib2hreG9tZnVnYWx6aG12a21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5ODgwMTUsImV4cCI6MjA3MDU2NDAxNX0.PA2_pI11rfUzi3c-M5fpaP4ciLwbWmn0ZBEL5PVhyFs';
+        const GOOGLE_CLIENT_ID = '1025442262611-t3t9rdjrg50vjk978115g0b459muim12.apps.googleusercontent.com';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function testSupabaseOAuth() {
+            // This will redirect to Google and show the error
+            supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/dashboard'
+                }
+            }).then(({data, error}) => {
+                if (error) {
+                    document.getElementById('result').innerHTML = '<div class="error">Error: ' + error.message + '</div>';
+                }
+            });
+        }
+        
+        function testDirectOAuth() {
+            // Build the direct Google OAuth URL
+            const redirectUri = 'https://cbohkxomfugalzhmvkmd.supabase.co/auth/v1/callback';
+            const params = new URLSearchParams({
+                client_id: GOOGLE_CLIENT_ID,
+                redirect_uri: redirectUri,
+                response_type: 'code',
+                scope: 'openid email profile',
+                access_type: 'offline',
+                prompt: 'select_account'
+            });
+            
+            const url = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+            
+            document.getElementById('result').innerHTML = `
+                <div class="success">
+                    <h3>Direct OAuth URL:</h3>
+                    <div class="code">${url}</div>
+                    <br>
+                    <button onclick="window.open('${url}', '_blank')">Open in New Tab →</button>
+                    <br><br>
+                    <strong>Redirect URI being used:</strong>
+                    <div class="code">${redirectUri}</div>
+                </div>
+            `;
+        }
+        
+        function checkConfig() {
+            document.getElementById('result').innerHTML = `
+                <div class="success">
+                    <h3>Current Configuration:</h3>
+                    <p><strong>Supabase URL:</strong> ${SUPABASE_URL}</p>
+                    <p><strong>Google Client ID:</strong> ${GOOGLE_CLIENT_ID}</p>
+                    <p><strong>Expected Callback URL:</strong></p>
+                    <div class="code">https://cbohkxomfugalzhmvkmd.supabase.co/auth/v1/callback</div>
+                    
+                    <h3>Steps to Fix:</h3>
+                    <ol>
+                        <li>Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a></li>
+                        <li>Navigate to APIs & Services → Credentials</li>
+                        <li>Click on your OAuth 2.0 Client ID</li>
+                        <li>Add the callback URL above to "Authorized redirect URIs"</li>
+                        <li>Click SAVE and wait 5 minutes for changes to propagate</li>
+                    </ol>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -2,11 +2,11 @@ import { NextRequest } from 'next/server';
 import { 
   successResponse, 
   errorResponse,
-} from '@/lib/api-helpers';
-import { withErrorHandler } from '@/lib/error-handler';
-import { withAuth } from '@/lib/auth-middleware';
-import { stripe } from '@/lib/stripe';
-import { supabase } from '@/lib/supabase';
+} from '../../../../lib/api-helpers';
+import { withErrorHandler } from '../../../../lib/error-handler';
+import { withAuth } from '../../../../lib/auth-middleware';
+import { stripe } from '../../../../lib/stripe';
+import { supabase } from '../../../../lib/supabase';
 
 /**
  * POST /api/payments/billing-portal

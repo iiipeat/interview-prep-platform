@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '../../../lib/supabase'
 
 /**
  * Auth callback route for OAuth providers and email confirmations

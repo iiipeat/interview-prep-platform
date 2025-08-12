@@ -1,9 +1,9 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../../lib/supabase'
 import type { User, Session } from '@supabase/supabase-js'
-import { type GoogleUser } from '@/lib/google-auth'
+import { type GoogleUser } from '../../lib/google-auth'
 
 interface UserProfile {
   id: string;

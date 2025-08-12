@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '../../../../lib/supabase'
 import { 
   successResponse, 
   errorResponse,
   notFoundResponse,
-} from '@/lib/api-helpers'
-import { withErrorHandler } from '@/lib/error-handler'
-import { validateUUID } from '@/lib/api-helpers'
+} from '../../../../lib/api-helpers'
+import { withErrorHandler } from '../../../../lib/error-handler'
+import { validateUUID } from '../../../../lib/api-helpers'
 
 /**
  * GET /api/questions/[id]

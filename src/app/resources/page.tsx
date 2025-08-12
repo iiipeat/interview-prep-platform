@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard, Button, Navigation } from '@/components/ui';
-import { supabase } from '@/lib/supabase';
+import { GlassCard, Button, Navigation } from '../../components/ui';
+import { supabase } from '../../lib/supabase';
 import { 
   Book,
   Clock,
@@ -18,7 +18,7 @@ import {
   MessageSquare,
   Video,
   CheckCircle
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 type ResourceCategory = 'quick' | 'deep' | 'saved';
 type ContentType = 'guide' | 'tips' | 'questions' | 'video';

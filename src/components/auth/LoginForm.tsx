@@ -3,8 +3,8 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { Button } from '../ui/Button'
+import { Input } from '../ui/Input'
 import { useAuth } from './AuthProvider'
 
 interface LoginFormProps {

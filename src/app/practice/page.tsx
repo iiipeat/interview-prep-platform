@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { GlassCard, Button, Navigation } from '@/components/ui';
-import { CustomFeedback, ProgressTracker } from '@/components/feedback';
-import { questionService } from '@/lib/ai/question-service';
-import { feedbackService } from '@/lib/ai/feedback-service';
-import { supabase } from '@/lib/supabase';
+import { GlassCard, Button, Navigation } from '../../components/ui';
+import { CustomFeedback, ProgressTracker } from '../../components/feedback';
+import { questionService } from '../../lib/ai/question-service';
+import { feedbackService } from '../../lib/ai/feedback-service';
+import { supabase } from '../../lib/supabase';
 import { 
   Briefcase,
   ChevronRight,
@@ -21,7 +21,7 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 type Step = 'setup' | 'question' | 'feedback';
 type Difficulty = 'easy' | 'medium' | 'hard';

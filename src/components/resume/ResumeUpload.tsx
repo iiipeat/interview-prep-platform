@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2, X } from '@/lib/icons';
-import { Button } from '@/components/ui/Button';
-import { GlassCard } from '@/components/ui/GlassCard';
+import { Upload, FileText, CheckCircle, AlertCircle, Loader2, X } from '../../lib/icons';
+import { Button } from '../ui/Button';
+import { GlassCard } from '../ui/GlassCard';
 
 interface ResumeData {
   fileName: string;

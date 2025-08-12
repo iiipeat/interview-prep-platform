@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { googleSheetsSync } from '@/lib/google-sheets-sync'
+import { googleSheetsSync } from '../../../../lib/google-sheets-sync'
 
 // Google OAuth token endpoint
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'

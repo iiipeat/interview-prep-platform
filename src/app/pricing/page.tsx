@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { GlassCard, Button, Navigation } from '@/components/ui';
+import { GlassCard, Button, Navigation } from '../../components/ui';
 import { 
   Check,
   Zap,
@@ -11,7 +11,7 @@ import {
   ArrowRight,
   Repeat,
   Loader2
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 interface PricingPlan {
   id: 'weekly' | 'monthly';

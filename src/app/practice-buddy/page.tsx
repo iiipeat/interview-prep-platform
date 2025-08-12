@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { GlassCard, Button, Navigation } from '@/components/ui';
+import { GlassCard, Button, Navigation } from '../../components/ui';
 import { 
   Users,
   Video,
@@ -22,7 +22,7 @@ import {
   Zap,
   Copy,
   ExternalLink
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 type BuddyStatus = 'setup' | 'waiting' | 'matched' | 'inSession' | 'completed';
 

@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import { Button } from '@/components/ui/Button'
-import { supabase } from '@/lib/supabase'
+import { Button } from '../ui/Button'
+import { supabase } from '../../lib/supabase'
 
 interface GoogleSignInButtonProps {
   text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin'

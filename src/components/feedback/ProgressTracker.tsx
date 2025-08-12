@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard } from '@/components/ui/GlassCard';
+import { GlassCard } from '../ui/GlassCard';
 import { 
   TrendingUp, 
   Minus,
@@ -10,7 +10,7 @@ import {
   Star,
   Calendar,
   Zap
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 interface ProgressMetric {
   name: string;

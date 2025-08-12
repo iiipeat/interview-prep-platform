@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard } from '@/components/ui/GlassCard';
+import { GlassCard } from '../ui/GlassCard';
 import { 
   Trophy, Target, Zap, Star, Award, TrendingUp, 
   Calendar, Clock, Users, BookOpen, Flame, Medal
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 export interface Achievement {
   id: string;

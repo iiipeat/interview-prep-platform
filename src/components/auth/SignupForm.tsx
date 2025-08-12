@@ -3,9 +3,9 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { GlassCard } from '@/components/ui/GlassCard'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { GlassCard } from '../ui/GlassCard'
+import { Button } from '../ui/Button'
+import { Input } from '../ui/Input'
 import { useAuth } from './AuthProvider'
 import { GoogleSignInButton } from './GoogleSignInButton'
 

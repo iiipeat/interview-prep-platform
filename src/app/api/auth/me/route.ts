@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '../../../../lib/supabase'
 import { 
   successResponse, 
   errorResponse,
   unauthorizedResponse,
-} from '@/lib/api-helpers'
-import { withErrorHandler } from '@/lib/error-handler'
+} from '../../../../lib/api-helpers'
+import { withErrorHandler } from '../../../../lib/error-handler'
 
 /**
  * GET /api/auth/me

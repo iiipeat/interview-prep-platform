@@ -1,13 +1,13 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '../../../../lib/supabase'
 import { 
   successResponse, 
   errorResponse, 
   validationErrorResponse,
-} from '@/lib/api-helpers'
-import { withErrorHandler } from '@/lib/error-handler'
-import { validateRequestBody, userRegistrationSchema } from '@/lib/validation'
-import { googleSheetsSync } from '@/lib/google-sheets-sync'
+} from '../../../../lib/api-helpers'
+import { withErrorHandler } from '../../../../lib/error-handler'
+import { validateRequestBody, userRegistrationSchema } from '../../../../lib/validation'
+import { googleSheetsSync } from '../../../../lib/google-sheets-sync'
 
 /**
  * POST /api/auth/signup

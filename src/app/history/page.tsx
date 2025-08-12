@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard, Button, Navigation } from '@/components/ui';
-import { supabase } from '@/lib/supabase';
+import { GlassCard, Button, Navigation } from '../../components/ui';
+import { supabase } from '../../lib/supabase';
 import { 
   Calendar,
   Clock,
@@ -17,7 +17,7 @@ import {
   ArrowUp,
   ArrowDown,
   Minus
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 interface Session {
   id: string;

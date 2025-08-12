@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { googleSheets } from '@/lib/google-sheets';
+import { supabaseAdmin } from '../../../../../lib/supabase';
+import { googleSheets } from '../../../../../lib/google-sheets';
 import { 
   successResponse, 
   errorResponse,
   unauthorizedResponse,
-} from '@/lib/api-helpers';
+} from '../../../../../lib/api-helpers';
 
 // Simple admin check - you should enhance this with proper authentication
 function isAdmin(request: NextRequest) {

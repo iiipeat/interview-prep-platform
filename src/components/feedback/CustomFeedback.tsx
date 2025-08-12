@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { Button } from '@/components/ui/Button';
+import { GlassCard } from '../ui/GlassCard';
+import { Button } from '../ui/Button';
 import { 
   CheckCircle, 
   TrendingUp, 
@@ -14,8 +14,8 @@ import {
   BookOpen,
   Zap,
   Award
-} from '@/lib/icons';
-import { CustomFeedback as FeedbackType, feedbackService } from '@/lib/ai/feedback-service';
+} from '../../lib/icons';
+import { CustomFeedback as FeedbackType, feedbackService } from '../../lib/ai/feedback-service';
 
 interface CustomFeedbackProps {
   sessionId: string;

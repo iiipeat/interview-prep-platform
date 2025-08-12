@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/Button';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { Users, Copy, Check, Video, Mic, MicOff, Share2 } from '@/lib/icons';
+import { Button } from '../ui/Button';
+import { GlassCard } from '../ui/GlassCard';
+import { Users, Copy, Check, Video, Mic, MicOff, Share2 } from '../../lib/icons';
 
 interface PracticeBuddyProps {
   sessionId?: string;

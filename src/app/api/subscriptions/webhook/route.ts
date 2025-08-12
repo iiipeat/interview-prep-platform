@@ -2,10 +2,10 @@ import { NextRequest } from 'next/server'
 import { 
   successResponse, 
   errorResponse,
-} from '@/lib/api-helpers'
-import { withErrorHandler } from '@/lib/error-handler'
-import { processWebhookEvent, type WebhookEvent } from '@/lib/stripe/webhook-handlers'
-import { stripe } from '@/lib/stripe'
+} from '../../../../lib/api-helpers'
+import { withErrorHandler } from '../../../../lib/error-handler'
+import { processWebhookEvent, type WebhookEvent } from '../../../../lib/stripe/webhook-handlers'
+import { stripe } from '../../../../lib/stripe'
 
 /**
  * POST /api/subscriptions/webhook

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '../../../lib/supabase'
 import { 
   successResponse, 
   errorResponse,
@@ -7,9 +7,9 @@ import {
   validationErrorResponse,
   parsePaginationParams,
   calculatePagination,
-} from '@/lib/api-helpers'
-import { withErrorHandler } from '@/lib/error-handler'
-import { validateRequestBody, sessionCreationSchema } from '@/lib/validation'
+} from '../../../lib/api-helpers'
+import { withErrorHandler } from '../../../lib/error-handler'
+import { validateRequestBody, sessionCreationSchema } from '../../../lib/validation'
 
 // Helper function to get user from auth token
 async function getUserFromToken(request: NextRequest) {

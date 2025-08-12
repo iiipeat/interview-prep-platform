@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../../../../lib/supabase'
 import { 
   successResponse, 
   errorResponse,
-} from '@/lib/api-helpers'
-import { withErrorHandler } from '@/lib/error-handler'
-import { withAuth } from '@/lib/auth-middleware'
+} from '../../../../lib/api-helpers'
+import { withErrorHandler } from '../../../../lib/error-handler'
+import { withAuth } from '../../../../lib/auth-middleware'
 
 /**
  * GET /api/prompts/usage

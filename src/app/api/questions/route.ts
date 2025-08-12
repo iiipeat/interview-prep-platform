@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '../../../lib/supabase'
 import { 
   successResponse, 
   errorResponse,
@@ -7,9 +7,9 @@ import {
   calculatePagination,
   parseSortParams,
   parseFilterParams,
-} from '@/lib/api-helpers'
-import { withErrorHandler } from '@/lib/error-handler'
-import { validateQueryParams, questionFilterSchema } from '@/lib/validation'
+} from '../../../lib/api-helpers'
+import { withErrorHandler } from '../../../lib/error-handler'
+import { validateQueryParams, questionFilterSchema } from '../../../lib/validation'
 
 /**
  * GET /api/questions

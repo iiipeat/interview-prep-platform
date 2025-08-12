@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button, GlassCard, Input } from '@/components/ui';
-import { supabase } from '@/lib/supabase';
+import { Button, GlassCard, Input } from '../../components/ui';
+import { supabase } from '../../lib/supabase';
 import { 
   Mail, 
   Lock, 
@@ -14,7 +14,7 @@ import {
   Briefcase,
   Target,
   Star
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 export default function SignUpPage() {
   const router = useRouter();

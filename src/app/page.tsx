@@ -3,7 +3,7 @@
 import { Button, GlassCard, Navigation } from '../components/ui';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '../components/auth/AuthProvider';
 import { useEffect, useState } from 'react';
 
 export default function Home() {

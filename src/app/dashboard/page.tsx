@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { GlassCard, Button, Navigation } from '@/components/ui';
-import { ProgressTracker } from '@/components/feedback';
-import { supabase } from '@/lib/supabase';
+import { GlassCard, Button, Navigation } from '../../components/ui';
+import { ProgressTracker } from '../../components/feedback';
+import { supabase } from '../../lib/supabase';
 import { 
   Target, 
   TrendingUp, 
@@ -21,7 +21,7 @@ import {
   AlertCircle,
   X,
   CheckCircle
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 interface UserProfile {
   id?: string;

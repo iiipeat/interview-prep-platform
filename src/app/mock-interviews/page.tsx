@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { GlassCard, Button, Navigation } from '@/components/ui';
-import { supabase } from '@/lib/supabase';
-import { generateInterviewQuestions, analyzeUserAnswer } from '@/lib/ai/ai-service';
+import { GlassCard, Button, Navigation } from '../../components/ui';
+import { supabase } from '../../lib/supabase';
+import { generateInterviewQuestions, analyzeUserAnswer } from '../../lib/ai/ai-service';
 import { 
   Video,
   Mic,
@@ -19,7 +19,7 @@ import {
   Award,
   Loader2,
   ChevronRight
-} from '@/lib/icons';
+} from '../../lib/icons';
 
 type InterviewStatus = 'setup' | 'ready' | 'inProgress' | 'completed';
 

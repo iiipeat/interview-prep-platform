@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../../../../lib/supabase'
 import { 
   successResponse, 
   errorResponse,
   validationErrorResponse,
   unauthorizedResponse,
-} from '@/lib/api-helpers'
-import { withErrorHandler } from '@/lib/error-handler'
+} from '../../../../lib/api-helpers'
+import { withErrorHandler } from '../../../../lib/error-handler'
 
 /**
  * POST /api/auth/refresh

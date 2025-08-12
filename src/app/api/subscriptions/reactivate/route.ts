@@ -2,12 +2,12 @@ import { NextRequest } from 'next/server';
 import { 
   successResponse, 
   errorResponse,
-} from '@/lib/api-helpers';
-import { withErrorHandler } from '@/lib/error-handler';
-import { withAuth } from '@/lib/auth-middleware';
-import { stripe } from '@/lib/stripe';
-import { supabase } from '@/lib/supabase';
-import { z } from '@/lib/validation';
+} from '../../../../lib/api-helpers';
+import { withErrorHandler } from '../../../../lib/error-handler';
+import { withAuth } from '../../../../lib/auth-middleware';
+import { stripe } from '../../../../lib/stripe';
+import { supabase } from '../../../../lib/supabase';
+import { z } from '../../../../lib/validation';
 
 const reactivateSchema = z.object({
   subscriptionId: z.string(),

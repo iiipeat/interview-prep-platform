@@ -1,15 +1,15 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '../../../../lib/supabase'
 import { 
   successResponse, 
   errorResponse,
   unauthorizedResponse,
   validationErrorResponse,
   rateLimitResponse,
-} from '@/lib/api-helpers'
-import { withErrorHandler } from '@/lib/error-handler'
-import { validateRequestBody, questionGenerationSchema } from '@/lib/validation'
-import { questionService, PromptLimitError, QuestionRequest } from '@/lib/ai/question-service'
+} from '../../../../lib/api-helpers'
+import { withErrorHandler } from '../../../../lib/error-handler'
+import { validateRequestBody, questionGenerationSchema } from '../../../../lib/validation'
+import { questionService, PromptLimitError, QuestionRequest } from '../../../../lib/ai/question-service'
 
 // Helper function to get user from auth token
 async function getUserFromToken(request: NextRequest) {

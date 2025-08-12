@@ -245,6 +245,8 @@ export default function AchievementsPage() {
   const loadUserAchievements = async () => {
     try {
       // Get user data from database
+      if (!supabase) return;
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         // Get user stats

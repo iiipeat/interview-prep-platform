@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { Button } from '@/components/ui/Button';
-import { Navigation } from '@/components/ui/Navigation';
+import { GlassCard, Button, Navigation } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { 
   Trophy,

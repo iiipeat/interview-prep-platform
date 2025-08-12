@@ -40,6 +40,38 @@ export const userRegistrationSchema = z.object({
   fullName: z.string().min(1)
 });
 
+// Missing schemas for API routes
+export const validateQueryParams = (params: any) => params;
+
+export const questionFilterSchema = z.object({
+  category: z.string().optional(),
+  difficulty: z.string().optional()
+});
+
+export const userResponseSchema = z.object({
+  response: z.string(),
+  questionId: z.string()
+});
+
+export const sessionCompletionSchema = z.object({
+  completed: z.boolean()
+});
+
+export const sessionCreationSchema = z.object({
+  type: z.string(),
+  userId: z.string()
+});
+
+export const userProfileCreationSchema = z.object({
+  fullName: z.string(),
+  email: z.string().email()
+});
+
+export const userProfileUpdateSchema = z.object({
+  fullName: z.string().optional(),
+  bio: z.string().optional()
+});
+
 // Question generation validation schema
 export const questionGenerationSchema = z.object({
   industry: z.string().optional(),

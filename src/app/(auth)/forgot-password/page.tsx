@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { GlassCard, Button, Input } from '@/components/ui'
+import { GlassCard } from '@/components/ui/GlassCard'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 import { supabase } from '@/lib/supabase'
 
 interface FormData {

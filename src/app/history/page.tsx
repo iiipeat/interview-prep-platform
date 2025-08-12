@@ -122,39 +122,31 @@ export default function HistoryPage() {
         if (dbSessions) {
           // Transform database sessions to display format
           // Add transformation logic here based on actual DB schema
-              {
-                question: 'Why are you interested in this role?',
-                type: 'cultural',
-                score: 92,
-                timeSpent: 110
-              }
-            ],
-            overallScore: 88,
-            duration: 10,
-            type: 'practice',
-            industry: 'tech',
-            difficulty: 'medium'
-          },
-          {
-            id: 'mock-2',
-            date: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-            questions: [
-              {
-                question: 'Describe a challenging situation you overcame',
-                type: 'behavioral',
-                score: 78,
-                timeSpent: 120
-              }
-            ],
-            overallScore: 78,
-            duration: 5,
-            type: 'practice',
-            industry: 'retail',
-            difficulty: 'easy'
-          }
-        ];
-        transformedSessions.push(...mockRecent);
+        }
       }
+      
+      // Add mock data for demonstration
+      const mockSessions = [
+        {
+          id: 'mock-1',
+          date: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+          questions: [
+            {
+              question: 'Describe a challenging situation you overcame',
+              type: 'behavioral',
+              score: 78,
+              timeSpent: 120
+            }
+          ],
+          overallScore: 78,
+          duration: 5,
+          type: 'practice',
+          industry: 'retail',
+          difficulty: 'easy'
+        }
+      ];
+      transformedSessions.push(...mockSessions);
+    }
       
       // Sort by date (newest first)
       transformedSessions.sort((a, b) => 

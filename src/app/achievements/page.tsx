@@ -245,13 +245,20 @@ export default function AchievementsPage() {
   const loadUserAchievements = async () => {
     try {
       // Get user data from database
-      const { user } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         // Get user stats
-        const { data: userStats } = await supabaseHelpers.getUserStats(user.id);
+        const { data: userStats } = await supabase
+          .from('user_stats')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
         
         // Get unlocked achievements
-        const { data: unlockedAchievements } = await supabaseHelpers.getUserAchievements(user.id);
+        const { data: unlockedAchievements } = await supabase
+          .from('user_achievements')
+          .select('*')
+          .eq('user_id', user.id);
         
         // Update achievements based on actual user data
         updateAchievements(userStats, unlockedAchievements);

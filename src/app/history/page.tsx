@@ -146,7 +146,6 @@ export default function HistoryPage() {
         }
       ];
       transformedSessions.push(...mockSessions);
-    }
       
       // Sort by date (newest first)
       transformedSessions.sort((a, b) => 

@@ -7,7 +7,7 @@ import {
 } from '../../../../lib/api-helpers'
 import { withErrorHandler } from '../../../../lib/error-handler'
 import { validateRequestBody, userRegistrationSchema } from '../../../../lib/validation'
-import { googleSheetsSync } from '../../../../lib/google-sheets-sync'
+// import { googleSheetsSync } from '../../../../lib/google-sheets-sync' // Disabled for now
 
 /**
  * POST /api/auth/signup
@@ -130,27 +130,27 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       // Continue with signup even if trial setup fails
     }
     
-    // Sync new user to Google Sheets in background
-    googleSheetsSync.syncUser(authData.user.id, {
-      id: authData.user.id,
-      email: authData.user.email,
-      full_name: fullName,
-      created_at: authData.user.created_at,
-      last_login_at: authData.user.created_at,
-      user_subscriptions: [{
-        status: 'trial',
-        trial_start_date: new Date().toISOString(),
-        trial_end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        subscription_plans: {
-          name: 'Free Trial',
-          price_weekly: 0,
-          price_monthly: 0
-        }
-      }],
-      practice_sessions: []
-    }).catch(err => {
-      console.error('Failed to sync new user to Google Sheets:', err)
-    })
+    // Sync new user to Google Sheets in background (disabled for now)
+    // googleSheetsSync.syncUser(authData.user.id, {
+    //   id: authData.user.id,
+    //   email: authData.user.email,
+    //   full_name: fullName,
+    //   created_at: authData.user.created_at,
+    //   last_login_at: authData.user.created_at,
+    //   user_subscriptions: [{
+    //     status: 'trial',
+    //     trial_start_date: new Date().toISOString(),
+    //     trial_end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    //     subscription_plans: {
+    //       name: 'Free Trial',
+    //       price_weekly: 0,
+    //       price_monthly: 0
+    //     }
+    //   }],
+    //   practice_sessions: []
+    // }).catch(err => {
+    //   console.error('Failed to sync new user to Google Sheets:', err)
+    // })
     
     return successResponse(
       {

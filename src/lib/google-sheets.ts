@@ -6,19 +6,27 @@ export class GoogleSheetsService {
   private sheets: any;
   private auth: any;
   private spreadsheetId: string;
+  private isInitialized: boolean = false;
+  private initializationError: string | null = null;
 
   constructor() {
     this.spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID || '';
-    this.initializeAuth();
+    // Don't initialize immediately - do it lazily when needed
   }
 
   private initializeAuth() {
+    if (this.isInitialized || this.initializationError) {
+      return;
+    }
+
     try {
       const privateKey = process.env.GOOGLE_SHEETS_PRIVATE_KEY?.replace(/\\n/g, '\n');
       const clientEmail = process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
 
       if (!privateKey || !clientEmail) {
-        throw new Error('Google Sheets credentials not configured');
+        this.initializationError = 'Google Sheets credentials not configured';
+        console.log('Google Sheets credentials not configured - service will be disabled');
+        return;
       }
 
       this.auth = new google.auth.JWT({
@@ -28,14 +36,26 @@ export class GoogleSheetsService {
       });
 
       this.sheets = google.sheets({ version: 'v4', auth: this.auth });
+      this.isInitialized = true;
     } catch (error) {
+      this.initializationError = `Failed to initialize Google Sheets auth: ${error}`;
       console.error('Failed to initialize Google Sheets auth:', error);
-      throw error;
+    }
+  }
+
+  private ensureInitialized() {
+    if (!this.isInitialized && !this.initializationError) {
+      this.initializeAuth();
+    }
+    
+    if (this.initializationError) {
+      throw new Error(this.initializationError);
     }
   }
 
   async createSpreadsheet(title: string) {
     try {
+      this.ensureInitialized();
       const response = await this.sheets.spreadsheets.create({
         requestBody: {
           properties: {
@@ -62,6 +82,7 @@ export class GoogleSheetsService {
   }
 
   async setupHeaders() {
+    this.ensureInitialized();
     const headers = [
       ['User ID', 'Email', 'Full Name', 'Subscription Status', 'Plan Type', 
        'Subscription Started', 'Trial End Date', 'Current Period End', 
@@ -125,6 +146,7 @@ export class GoogleSheetsService {
 
   async clearSheet() {
     try {
+      this.ensureInitialized();
       // Get the actual sheet name
       const sheetsResponse = await this.sheets.spreadsheets.get({
         spreadsheetId: this.spreadsheetId,
@@ -144,6 +166,7 @@ export class GoogleSheetsService {
 
   async updateUserData(userData: any[]) {
     try {
+      this.ensureInitialized();
       // Clear existing data (except headers)
       await this.clearSheet();
 
@@ -276,6 +299,7 @@ export class GoogleSheetsService {
 
   async appendUserData(userData: any) {
     try {
+      this.ensureInitialized();
       const row = [[
         userData.id || '',
         userData.email || '',
@@ -320,6 +344,7 @@ export class GoogleSheetsService {
   }
 
   async getSpreadsheetUrl() {
+    this.ensureInitialized();
     return `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}`;
   }
 }

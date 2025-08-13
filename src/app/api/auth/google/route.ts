@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { googleSheetsSync } from '../../../../lib/google-sheets-sync'
+// import { googleSheetsSync } from '../../../../lib/google-sheets-sync' // Disabled for now
 
 // Google OAuth token endpoint
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -98,10 +98,10 @@ export async function POST(request: NextRequest) {
       practice_sessions: []
     }
 
-    // Sync to Google Sheets in background
-    googleSheetsSync.syncUser(`google-${googleUser.id}`, userData).catch(err => {
-      console.error('Failed to sync Google OAuth user to Sheets:', err)
-    })
+    // Sync to Google Sheets in background (disabled for now)
+    // googleSheetsSync.syncUser(`google-${googleUser.id}`, userData).catch(err => {
+    //   console.error('Failed to sync Google OAuth user to Sheets:', err)
+    // })
 
     console.log(`Google OAuth login synced for user: ${googleUser.email}`)
 

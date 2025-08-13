@@ -1,15 +1,27 @@
 // Dynamic import to avoid build errors when package is not installed
 let GoogleGenerativeAI: any = null;
 let genAI: any = null;
+let isInitialized = false;
+let initializationError: string | null = null;
 
-// Try to load Google AI SDK if available
-if (typeof window === 'undefined') {
+// Lazy initialization function
+async function initializeGoogleAI() {
+  if (isInitialized || initializationError) {
+    return;
+  }
+
   try {
-    const { GoogleGenerativeAI: GAPI } = require('@google/generative-ai');
-    if (process.env.GOOGLE_AI_API_KEY) {
-      genAI = new GAPI(process.env.GOOGLE_AI_API_KEY);
+    // Use dynamic import to avoid webpack resolution issues
+    const module = await import('@google/generative-ai').catch(() => null);
+    if (module && process.env.GOOGLE_AI_API_KEY) {
+      GoogleGenerativeAI = module.GoogleGenerativeAI;
+      genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+      isInitialized = true;
+    } else {
+      initializationError = 'Google AI SDK not available or API key not set';
     }
   } catch (error) {
+    initializationError = 'Google AI SDK not installed, using mock data';
     console.log('Google AI SDK not installed, using mock data');
   }
 }
@@ -56,13 +68,22 @@ class AIService {
   private googleAI: any;
 
   constructor() {
-    this.googleAI = genAI;
+    this.googleAI = null;
+  }
+
+  private async ensureInitialized() {
+    if (!this.googleAI && !initializationError) {
+      await initializeGoogleAI();
+      this.googleAI = genAI;
+    }
   }
 
   /**
    * Generate interview questions using Claude API
    */
   async generateQuestions(params: QuestionGenerationParams): Promise<GeneratedQuestion[]> {
+    await this.ensureInitialized();
+    
     if (!this.googleAI) {
       // Fallback to mock questions if API not configured
       return this.generateMockQuestions(params);
@@ -87,6 +108,8 @@ class AIService {
    * Analyze user's answer and provide feedback
    */
   async analyzeAnswer(params: AnswerAnalysisParams): Promise<AnswerFeedback> {
+    await this.ensureInitialized();
+    
     if (!this.googleAI) {
       // Fallback to mock feedback if API not configured
       return this.generateMockFeedback(params);
@@ -111,6 +134,8 @@ class AIService {
    * Generate a practice buddy response
    */
   async generateBuddyResponse(context: string, userMessage: string): Promise<string> {
+    await this.ensureInitialized();
+    
     if (!this.googleAI) {
       return "Great point! Let me think about that...";
     }

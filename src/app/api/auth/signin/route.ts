@@ -7,7 +7,7 @@ import {
 } from '../../../../lib/api-helpers'
 import { withErrorHandler } from '../../../../lib/error-handler'
 import { validateRequestBody, userLoginSchema } from '../../../../lib/validation'
-import { googleSheetsSync } from '../../../../lib/google-sheets-sync'
+// import { googleSheetsSync } from '../../../../lib/google-sheets-sync' // Disabled for now
 
 /**
  * POST /api/auth/signin
@@ -55,10 +55,10 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       .update({ last_login_at: new Date().toISOString() })
       .eq('id', authData.user.id)
     
-    // Sync user data to Google Sheets in background
-    googleSheetsSync.updateUserLogin(authData.user.id, authData.user.email).catch(err => {
-      console.error('Failed to sync login to Google Sheets:', err)
-    })
+    // Sync user data to Google Sheets in background (disabled for now)
+    // googleSheetsSync.updateUserLogin(authData.user.id, authData.user.email).catch(err => {
+    //   console.error('Failed to sync login to Google Sheets:', err)
+    // })
     
     // Get user profile information
     const { data: userProfile, error: profileError } = await supabaseAdmin!

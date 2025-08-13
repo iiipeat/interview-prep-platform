@@ -11,18 +11,21 @@ async function initializeGoogleAI() {
   }
 
   try {
-    // Use dynamic import to avoid webpack resolution issues
-    const module = await import('@google/generative-ai').catch(() => null);
-    if (module && process.env.GOOGLE_AI_API_KEY) {
-      GoogleGenerativeAI = module.GoogleGenerativeAI;
-      genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-      isInitialized = true;
-    } else {
-      initializationError = 'Google AI SDK not available or API key not set';
-    }
+    // Temporarily disabled Google AI integration - using mock data
+    // TODO: Replace with Claude API integration
+    // const module = await import('@google/generative-ai').catch(() => null);
+    // if (module && process.env.GOOGLE_AI_API_KEY) {
+    //   GoogleGenerativeAI = module.GoogleGenerativeAI;
+    //   genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+    //   isInitialized = true;
+    // } else {
+    //   initializationError = 'Google AI SDK not available or API key not set';
+    // }
+    initializationError = 'AI integration temporarily disabled, using mock data';
+    console.log('AI integration temporarily disabled, using mock data');
   } catch (error) {
-    initializationError = 'Google AI SDK not installed, using mock data';
-    console.log('Google AI SDK not installed, using mock data');
+    initializationError = 'AI SDK not available, using mock data';
+    console.log('AI SDK not available, using mock data');
   }
 }
 

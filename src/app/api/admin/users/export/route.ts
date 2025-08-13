@@ -85,10 +85,13 @@ export async function GET(request: NextRequest) {
           }
         } else if (subscription.status === 'active') {
           subscriptionStatus = 'Active Subscription';
-          if (subscription.subscription_plans?.price_weekly) {
-            planType = 'Weekly ($' + (subscription.subscription_plans.price_weekly / 100) + '/week)';
-          } else if (subscription.subscription_plans?.price_monthly) {
-            planType = 'Monthly ($' + (subscription.subscription_plans.price_monthly / 100) + '/month)';
+          const plan = Array.isArray(subscription.subscription_plans) 
+            ? subscription.subscription_plans[0] 
+            : subscription.subscription_plans;
+          if (plan?.price_weekly) {
+            planType = 'Weekly ($' + (plan.price_weekly / 100) + '/week)';
+          } else if (plan?.price_monthly) {
+            planType = 'Monthly ($' + (plan.price_monthly / 100) + '/month)';
           }
           paymentStatus = 'Active';
         } else if (subscription.status === 'cancelled') {

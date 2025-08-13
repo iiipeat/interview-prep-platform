@@ -38,6 +38,9 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const period = searchParams.get('period') || '30' // days
   
   try {
+    if (!supabaseAdmin) {
+      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+    }
     // Calculate date range
     const endDate = new Date()
     const startDate = new Date()

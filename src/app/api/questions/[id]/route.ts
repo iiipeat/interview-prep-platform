@@ -24,6 +24,9 @@ export const GET = withErrorHandler(async (
   }
   
   try {
+    if (!supabaseAdmin) {
+      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+    }
     const { data: question, error } = await supabaseAdmin
       .from('questions')
       .select(`

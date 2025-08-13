@@ -30,6 +30,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const profileData = body.profileData || {}
   
   try {
+    if (!supabaseAdmin) {
+      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+    }
     // Create user in Supabase Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,

@@ -9,6 +9,7 @@ import { withErrorHandler } from '../../../../lib/error-handler'
  */
 export const POST = withErrorHandler(async (request: NextRequest) => {
   try {
+    if (!supabase) return;
     const { error } = await supabase.auth.signOut()
     
     if (error) {

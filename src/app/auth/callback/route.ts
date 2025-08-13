@@ -24,9 +24,13 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     try {
+    if (!supabaseAdmin) {
+      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+    }
       const supabase = createRouteHandlerClient({ cookies })
       
       // Exchange code for session
+      if (!supabase) return;
       const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
       
       if (sessionError) {

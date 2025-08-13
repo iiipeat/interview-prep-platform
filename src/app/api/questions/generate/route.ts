@@ -51,6 +51,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   }
   
   try {
+    if (!supabaseAdmin) {
+      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+    }
     // Check user's subscription status
     const { data: subscription } = await supabaseAdmin
       .from('user_subscriptions')

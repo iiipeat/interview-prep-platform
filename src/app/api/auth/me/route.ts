@@ -13,6 +13,9 @@ import { withErrorHandler } from '../../../../lib/error-handler'
  */
 export const GET = withErrorHandler(async (request: NextRequest) => {
   try {
+    if (!supabaseAdmin) {
+      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+    }
     // Get authorization header
     const authHeader = request.headers.get('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

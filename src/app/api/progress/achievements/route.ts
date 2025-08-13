@@ -40,6 +40,9 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const { page, limit, offset } = parsePaginationParams(searchParams)
   
   try {
+    if (!supabaseAdmin) {
+      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+    }
     const { data: achievements, error, count } = await supabaseAdmin
       .from('user_achievements')
       .select('*', { count: 'exact' })

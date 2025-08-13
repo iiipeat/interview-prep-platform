@@ -29,7 +29,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const { email, password } = validatedData
   
   try {
+    if (!supabaseAdmin) {
+      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+    }
     // Authenticate with Supabase
+    if (!supabase) return;
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,

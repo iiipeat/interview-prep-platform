@@ -22,6 +22,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Refresh the session with Supabase
+    if (!supabase) return;
     const { data: authData, error: authError } = await supabase.auth.refreshSession({
       refresh_token: refreshToken,
     })

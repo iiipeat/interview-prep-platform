@@ -42,6 +42,9 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   }
   
   try {
+    if (!supabaseAdmin) {
+      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+    }
     const { data: profile, error } = await supabaseAdmin
       .from('user_profiles')
       .select('*')

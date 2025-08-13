@@ -21,6 +21,10 @@ export async function GET(request: NextRequest) {
 
   try {
     // Fetch all users with their subscription data
+    if (!supabaseAdmin) {
+      return errorResponse('Database not configured', 500);
+    }
+    
     const { data: users, error: usersError } = await supabaseAdmin
       .from('users')
       .select(`

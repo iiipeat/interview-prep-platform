@@ -27,7 +27,7 @@ export const GET = withErrorHandler(async (
     if (!supabaseAdmin) {
       return errorResponse("Database not configured", 500);
     }
-    const { data: question, error } = await supabaseAdmin
+    const { data: question, error } = await supabaseAdmin!
       .from('questions')
       .select(`
         *,
@@ -49,7 +49,7 @@ export const GET = withErrorHandler(async (
     }
     
     // Increment usage count
-    await supabaseAdmin.rpc('increment_question_usage', { question_uuid: id })
+    await supabaseAdmin!.rpc('increment_question_usage', { question_uuid: id })
     
     return successResponse(question)
     

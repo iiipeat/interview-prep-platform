@@ -22,7 +22,7 @@ async function getUserFromToken(request: NextRequest) {
   }
   
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token)
   
   if (error || !user) {
     return null
@@ -45,7 +45,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     if (!supabaseAdmin) {
       return errorResponse("Database not configured", 500);
     }
-    const { data: profile, error } = await supabaseAdmin
+    const { data: profile, error } = await supabaseAdmin!
       .from('user_profiles')
       .select('*')
       .eq('user_id', user.id)
@@ -91,7 +91,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   
   try {
     // Check if profile already exists
-    const { data: existingProfile } = await supabaseAdmin
+    const { data: existingProfile } = await supabaseAdmin!
       .from('user_profiles')
       .select('id')
       .eq('user_id', user.id)
@@ -102,7 +102,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Create new profile
-    const { data: profile, error } = await supabaseAdmin
+    const { data: profile, error } = await supabaseAdmin!
       .from('user_profiles')
       .insert({
         user_id: user.id,
@@ -147,7 +147,7 @@ export const PUT = withErrorHandler(async (request: NextRequest) => {
   
   try {
     // Update profile
-    const { data: profile, error } = await supabaseAdmin
+    const { data: profile, error } = await supabaseAdmin!
       .from('user_profiles')
       .update({
         ...validatedData,
@@ -184,7 +184,7 @@ export const DELETE = withErrorHandler(async (request: NextRequest) => {
   }
   
   try {
-    const { error } = await supabaseAdmin
+    const { error } = await supabaseAdmin!
       .from('user_profiles')
       .delete()
       .eq('user_id', user.id)

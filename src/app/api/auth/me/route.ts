@@ -25,14 +25,14 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     const token = authHeader.replace('Bearer ', '')
     
     // Verify the JWT token with Supabase
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    const { data: { user }, error: authError } = await supabaseAdmin!.auth.getUser(token)
     
     if (authError || !user) {
       return unauthorizedResponse('Invalid or expired token')
     }
     
     // Get user profile with extended information
-    const { data: userProfile, error: profileError } = await supabaseAdmin
+    const { data: userProfile, error: profileError } = await supabaseAdmin!
       .from('users')
       .select(`
         *,

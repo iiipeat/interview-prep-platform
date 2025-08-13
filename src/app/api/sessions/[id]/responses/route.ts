@@ -18,7 +18,7 @@ async function getUserFromToken(request: NextRequest) {
   }
   
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token)
   
   if (error || !user) {
     return null
@@ -63,7 +63,7 @@ export const POST = withErrorHandler(async (
       return errorResponse("Database not configured", 500);
     }
     // Verify session belongs to user and is in progress
-    const { data: session, error: sessionError } = await supabaseAdmin
+    const { data: session, error: sessionError } = await supabaseAdmin!
       .from('practice_sessions')
       .select('id, user_id, status, questions_answered, total_questions')
       .eq('id', sessionId)
@@ -79,7 +79,7 @@ export const POST = withErrorHandler(async (
     }
     
     // Check if response already exists for this question
-    const { data: existingResponse } = await supabaseAdmin
+    const { data: existingResponse } = await supabaseAdmin!
       .from('user_responses')
       .select('id')
       .eq('session_id', sessionId)
@@ -92,7 +92,7 @@ export const POST = withErrorHandler(async (
     }
     
     // Create user response
-    const { data: response, error: responseError } = await supabaseAdmin
+    const { data: response, error: responseError } = await supabaseAdmin!
       .from('user_responses')
       .insert({
         session_id: sessionId,
@@ -132,7 +132,7 @@ export const POST = withErrorHandler(async (
       sessionUpdateData.completed_at = new Date().toISOString()
     }
     
-    await supabaseAdmin
+    await supabaseAdmin!
       .from('practice_sessions')
       .update(sessionUpdateData)
       .eq('id', sessionId)
@@ -143,7 +143,7 @@ export const POST = withErrorHandler(async (
       const aiFeedback = await generateMockAIFeedback(response)
       
       // Update response with AI feedback
-      await supabaseAdmin
+      await supabaseAdmin!
         .from('user_responses')
         .update({
           ai_score: aiFeedback.score,

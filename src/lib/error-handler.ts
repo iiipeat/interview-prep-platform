@@ -259,7 +259,7 @@ export async function retryOperation<T>(
   maxRetries: number = 3,
   delay: number = 1000
 ): Promise<T> {
-  let lastError: Error
+  let lastError: Error = new Error('Operation failed')
   
   for (let i = 0; i <= maxRetries; i++) {
     try {
@@ -318,7 +318,7 @@ export function getUserFriendlyError(error: unknown): string {
   }
   
   if (isSupabaseError(error)) {
-    const { code } = error
+    const { code } = error as any
     switch (code) {
       case '23505':
         return 'This item already exists'

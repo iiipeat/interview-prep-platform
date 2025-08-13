@@ -98,7 +98,7 @@ export default function PracticeBuddyPage() {
       }
     } catch (error) {
       console.error('Error finding match:', error);
-      setStatus('idle');
+      setStatus('setup');
     }
   };
   

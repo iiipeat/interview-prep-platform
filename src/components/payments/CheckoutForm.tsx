@@ -123,7 +123,7 @@ export function CheckoutForm({ planId, planName, price, period, onSuccess, onCan
             label="Full Name"
             type="text"
             value={formData.fullName}
-            onChange={handleInputChange('fullName')}
+            onChange={(e) => handleInputChange('fullName')(e.target.value)}
             placeholder="Enter your full name"
             required
             disabled={loading}
@@ -133,7 +133,7 @@ export function CheckoutForm({ planId, planName, price, period, onSuccess, onCan
             label="Email Address"
             type="email"
             value={formData.email}
-            onChange={handleInputChange('email')}
+            onChange={(e) => handleInputChange('email')(e.target.value)}
             placeholder="Enter your email"
             required
             disabled={loading}

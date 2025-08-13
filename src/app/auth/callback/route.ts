@@ -25,12 +25,18 @@ export async function GET(request: NextRequest) {
   if (code) {
     try {
     if (!supabaseAdmin) {
-      return errorResponse("Database not configured", 500);
+      const errorUrl = new URL('/auth/login', requestUrl.origin)
+      errorUrl.searchParams.set('error', 'Database not configured')
+      return NextResponse.redirect(errorUrl)
     }
       const supabase = createRouteHandlerClient({ cookies })
       
       // Exchange code for session
-      if (!supabase) return;
+      if (!supabase) {
+        const errorUrl = new URL('/auth/login', requestUrl.origin)
+        errorUrl.searchParams.set('error', 'Database connection error')
+        return NextResponse.redirect(errorUrl)
+      }
       const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
       
       if (sessionError) {
@@ -47,7 +53,7 @@ export async function GET(request: NextRequest) {
                           new Date(Date.now() - 60000).getTime() // Within last minute
 
         // Ensure user exists in our database
-        const { data: existingUser } = await supabaseAdmin
+        const { data: existingUser } = await supabaseAdmin!
           .from('users')
           .select('id')
           .eq('id', sessionData.user.id)
@@ -55,7 +61,7 @@ export async function GET(request: NextRequest) {
 
         if (!existingUser) {
           // Create user profile for OAuth users
-          const { error: insertError } = await supabaseAdmin
+          const { error: insertError } = await supabaseAdmin!
             .from('users')
             .insert({
               id: sessionData.user.id,
@@ -78,7 +84,7 @@ export async function GET(request: NextRequest) {
             // Set up 7-day free trial for new users
             try {
               // Get free trial plan
-              const { data: freePlan } = await supabaseAdmin
+              const { data: freePlan } = await supabaseAdmin!
                 .from('subscription_plans')
                 .select('id')
                 .eq('name', 'Free Trial')
@@ -88,7 +94,7 @@ export async function GET(request: NextRequest) {
                 const trialEndDate = new Date()
                 trialEndDate.setDate(trialEndDate.getDate() + 7)
 
-                await supabaseAdmin
+                await supabaseAdmin!
                   .from('user_subscriptions')
                   .insert({
                     user_id: sessionData.user.id,
@@ -105,7 +111,7 @@ export async function GET(request: NextRequest) {
           }
         } else {
           // Update last login for existing users
-          await supabaseAdmin
+          await supabaseAdmin!
             .from('users')
             .update({ last_login_at: new Date().toISOString() })
             .eq('id', sessionData.user.id)

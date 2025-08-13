@@ -15,7 +15,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     if (!supabaseAdmin) {
       return errorResponse("Database not configured", 500);
     }
-    const { data: plans, error } = await supabaseAdmin
+    const { data: plans, error } = await supabaseAdmin!
       .from('subscription_plans')
       .select('*')
       .eq('is_active', true)

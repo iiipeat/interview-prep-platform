@@ -1,24 +1,46 @@
 // Mock validation schemas for development
 
+export class ZodError extends Error {
+  errors: any[];
+  constructor(errors: any[]) {
+    super('Validation error');
+    this.errors = errors;
+  }
+}
+
 export const z = {
+  ZodError,
   object: (shape: any) => ({
     parse: (data: any) => data,
     safeParse: (data: any) => ({ success: true, data }),
-    shape
+    shape,
+    omit: (keys: any) => z.object(shape),
+    pick: (keys: any) => z.object(shape),
+    extend: (newShape: any) => z.object({ ...shape, ...newShape })
   }),
-  string: () => ({
-    email: () => ({ email: true }),
-    min: (n: number) => ({ min: n }),
-    max: (n: number) => ({ max: n }),
-    optional: () => ({ optional: true }),
-    url: () => ({ url: true })
-  }),
+  string: () => {
+    const chain: any = {
+      email: () => chain,
+      min: (n: number) => chain,
+      max: (n: number) => chain,
+      optional: () => chain,
+      url: () => chain
+    };
+    return chain;
+  },
   number: () => ({
     positive: () => ({ positive: true }),
     int: () => ({ int: true }),
     optional: () => ({ optional: true })
   }),
-  boolean: () => ({ boolean: true }),
+  boolean: () => {
+    const chain: any = {
+      optional: () => chain,
+      default: (val: any) => chain,
+      boolean: true
+    };
+    return chain;
+  },
   array: (schema: any) => ({ array: true, schema }),
   enum: (values: any[]) => ({ enum: values }),
   literal: (value: any) => ({ literal: value })

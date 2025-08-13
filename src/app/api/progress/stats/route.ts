@@ -15,7 +15,7 @@ async function getUserFromToken(request: NextRequest) {
   }
   
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token)
   
   if (error || !user) {
     return null
@@ -50,7 +50,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     const endDateStr = endDate.toISOString().split('T')[0]
     
     // Get session statistics
-    const { data: sessionStats, error: sessionError } = await supabaseAdmin
+    const { data: sessionStats, error: sessionError } = await supabaseAdmin!
       .from('practice_sessions')
       .select('status, overall_score, started_at, completed_at')
       .eq('user_id', user.id)
@@ -62,7 +62,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Get response statistics
-    const { data: responseStats, error: responseError } = await supabaseAdmin
+    const { data: responseStats, error: responseError } = await supabaseAdmin!
       .from('user_responses')
       .select('ai_score, response_time_seconds, question_rating, created_at')
       .eq('user_id', user.id)
@@ -74,7 +74,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Get progress metrics for the period
-    const { data: progressMetrics, error: progressError } = await supabaseAdmin
+    const { data: progressMetrics, error: progressError } = await supabaseAdmin!
       .from('user_progress')
       .select('*')
       .eq('user_id', user.id)
@@ -168,14 +168,14 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     const improvementTrend = secondHalfAvgScore - firstHalfAvgScore
     
     // Recent achievements count
-    const { count: recentAchievements } = await supabaseAdmin
+    const { count: recentAchievements } = await supabaseAdmin!
       .from('user_achievements')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .gte('earned_at', startDate.toISOString())
     
     // Performance by question type
-    const { data: questionTypeStats, error: questionTypeError } = await supabaseAdmin
+    const { data: questionTypeStats, error: questionTypeError } = await supabaseAdmin!
       .from('user_responses')
       .select(`
         ai_score,
@@ -188,9 +188,9 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
       .gte('created_at', startDate.toISOString())
       .lte('created_at', endDate.toISOString())
     
-    const performanceByType = (questionTypeStats || []).reduce((acc, response) => {
-      const questionType = response.questions.question_type
-      const difficulty = response.questions.difficulty
+    const performanceByType = (questionTypeStats || []).reduce((acc, response: any) => {
+      const questionType = response.questions?.question_type
+      const difficulty = response.questions?.difficulty
       const score = response.ai_score || 0
       
       if (!acc[questionType]) {

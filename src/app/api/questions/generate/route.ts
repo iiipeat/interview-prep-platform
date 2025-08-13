@@ -19,7 +19,7 @@ async function getUserFromToken(request: NextRequest) {
   }
   
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token)
   
   if (error || !user) {
     return null
@@ -55,7 +55,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       return errorResponse("Database not configured", 500);
     }
     // Check user's subscription status
-    const { data: subscription } = await supabaseAdmin
+    const { data: subscription } = await supabaseAdmin!
       .from('user_subscriptions')
       .select(`
         status,
@@ -142,7 +142,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     }));
     
     // Cache generated questions in database
-    const { data: savedQuestions, error: saveError } = await supabaseAdmin
+    const { data: savedQuestions, error: saveError } = await supabaseAdmin!
       .from('questions')
       .insert(questionsForDb)
       .select('*')

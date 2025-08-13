@@ -25,9 +25,7 @@ export const POST = withErrorHandler(
       const { subscriptionId, cancelImmediately } = cancelSchema.parse(body);
 
       // Verify the subscription belongs to the user
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: subscription, error } = await supabase
+      const { data: subscription, error } = await supabase
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', user.id)
@@ -51,9 +49,7 @@ export const POST = withErrorHandler(
       }
 
       // Update subscription in our database
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from('user_subscriptions')
         .update({
           status: cancelImmediately ? 'canceled' : subscription.status,

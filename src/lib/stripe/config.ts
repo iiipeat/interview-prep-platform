@@ -107,7 +107,7 @@ export const calculateSavings = (): number => {
  */
 export const calculateTrialEndDate = (startDate: Date = new Date()): Date => {
   const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + stripeConfig.plan.trialDays);
+  endDate.setDate(startDate.getDate() + stripeConfig.plans.weekly.trialDays);
   return endDate;
 };
 

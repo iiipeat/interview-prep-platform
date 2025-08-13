@@ -19,7 +19,7 @@ async function getUserFromToken(request: NextRequest) {
   }
   
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token)
   
   if (error || !user) {
     return null
@@ -44,6 +44,9 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   
   try {
     // Build query
+    if (!supabaseAdmin) {
+      return errorResponse('Database connection error', 500)
+    }
     let query = supabaseAdmin
       .from('practice_sessions')
       .select('*', { count: 'exact' })
@@ -102,7 +105,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       return errorResponse("Database not configured", 500);
     }
     // Check subscription limits
-    const { data: subscription } = await supabaseAdmin
+    const { data: subscription } = await supabaseAdmin!
       .from('user_subscriptions')
       .select(`
         status,
@@ -120,20 +123,20 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     
     // Check daily session limit
     const today = new Date().toISOString().split('T')[0]
-    const { count: todaySessions } = await supabaseAdmin
+    const { count: todaySessions } = await supabaseAdmin!
       .from('practice_sessions')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .gte('started_at', `${today}T00:00:00.000Z`)
       .lt('started_at', `${today}T23:59:59.999Z`)
     
-    const maxSessions = subscription.subscription_plans.max_sessions_per_day
+    const maxSessions = (subscription.subscription_plans as any)?.max_sessions_per_day
     if (maxSessions && todaySessions && todaySessions >= maxSessions) {
       return errorResponse(`Daily session limit of ${maxSessions} reached`, 429)
     }
     
     // Create session
-    const { data: session, error: sessionError } = await supabaseAdmin
+    const { data: session, error: sessionError } = await supabaseAdmin!
       .from('practice_sessions')
       .insert({
         user_id: user.id,

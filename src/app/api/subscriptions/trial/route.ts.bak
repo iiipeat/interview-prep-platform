@@ -15,9 +15,7 @@ export const POST = withErrorHandler(
   withAuth(async (request: NextRequest, { user }) => {
     try {
       // Check if user already has a subscription
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: existingSubscription, error: existingError } = await supabase
+      const { data: existingSubscription, error: existingError } = await supabase
         .from('user_subscriptions')
         .select('id, status, trial_end_date')
         .eq('user_id', user.id)
@@ -33,9 +31,7 @@ export const POST = withErrorHandler(
       }
 
       // Get the simplified subscription plan
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: plan, error: planError } = await supabase
+      const { data: plan, error: planError } = await supabase
         .from('subscription_plans')
         .select('*')
         .eq('name', 'Interview Prep Access')
@@ -52,9 +48,7 @@ export const POST = withErrorHandler(
       const trialEndDate = new Date()
       trialEndDate.setDate(trialStartDate.getDate() + 7) // 7-day trial
 
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: subscription, error: subscriptionError } = await supabase
+      const { data: subscription, error: subscriptionError } = await supabase
         .from('user_subscriptions')
         .insert({
           user_id: user.id,
@@ -85,9 +79,7 @@ export const POST = withErrorHandler(
       }
 
       // Initialize prompt usage tracking for the user
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { error: promptUsageError } = await supabase
+      const { error: promptUsageError } = await supabase
         .from('prompt_usage')
         .insert({
           user_id: user.id,

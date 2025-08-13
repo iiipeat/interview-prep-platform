@@ -17,6 +17,7 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
+      if (!supabase) return;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -41,6 +42,7 @@ export default function LoginPage() {
     
     try {
       // Use Supabase authentication
+      if (!supabase) return;
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password
@@ -53,7 +55,7 @@ export default function LoginPage() {
         localStorage.setItem('user', JSON.stringify({
           id: authData.user.id,
           email: authData.user.email,
-          name: authData.user.name || authData.user.email.split('@')[0]
+          name: (authData.user as any).name || authData.user.email?.split('@')[0]
         }));
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('currentUserId', authData.user.id);

@@ -17,9 +17,7 @@ export const GET = withErrorHandler(
       const today = new Date().toISOString().split('T')[0];
       
       // Get user's prompt usage for today using the database function
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: usageData, error } = await supabase
+      const { data: usageData, error } = await supabase
         .rpc('get_daily_prompt_usage', { 
           user_uuid: user.id,
           check_date: today 
@@ -35,10 +33,10 @@ export const GET = withErrorHandler(
       resetTime.setHours(24, 0, 0, 0); // Next midnight
 
       return successResponse({
-        todayCount: (usageData as any)?.current_usage || 0,
-        dailyLimit: (usageData as any)?.daily_limit || 20,
-        remainingPrompts: (usageData as any)?.remaining_prompts || 20,
-        canMakePrompt: (usageData as any)?.can_make_prompt || true,
+        todayCount: usageData.current_usage || 0,
+        dailyLimit: usageData.daily_limit || 20,
+        remainingPrompts: usageData.remaining_prompts || 20,
+        canMakePrompt: usageData.can_make_prompt || true,
         resetTime: resetTime.toISOString(),
         date: today,
       });
@@ -60,9 +58,7 @@ export const POST = withErrorHandler(
       const today = new Date().toISOString().split('T')[0];
       
       // Check if user has active subscription
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: subscription } = await supabase
+      const { data: subscription } = await supabase
         .from('user_subscriptions')
         .select('status, trial_end_date, current_period_end')
         .eq('user_id', user.id)
@@ -88,9 +84,7 @@ export const POST = withErrorHandler(
       }
 
       // Attempt to increment usage using the database function
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: canIncrement, error } = await supabase
+      const { data: canIncrement, error } = await supabase
         .rpc('increment_prompt_usage', { 
           user_uuid: user.id,
           usage_date: today 
@@ -107,9 +101,7 @@ export const POST = withErrorHandler(
       }
 
       // Get updated usage stats
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: usageData, error: usageError } = await supabase
+      const { data: usageData, error: usageError } = await supabase
         .rpc('get_daily_prompt_usage', { 
           user_uuid: user.id,
           check_date: today 
@@ -132,10 +124,10 @@ export const POST = withErrorHandler(
         success: true,
         message: 'Prompt usage tracked successfully',
         usage: {
-          todayCount: (usageData as any)?.current_usage || 0,
-          dailyLimit: (usageData as any)?.daily_limit || 20,
-          remainingPrompts: (usageData as any)?.remaining_prompts || 0,
-          canMakePrompt: (usageData as any)?.can_make_prompt || false,
+          todayCount: usageData.current_usage || 0,
+          dailyLimit: usageData.daily_limit || 20,
+          remainingPrompts: usageData.remaining_prompts || 0,
+          canMakePrompt: usageData.can_make_prompt || false,
           resetTime: resetTime.toISOString(),
           date: today,
         }
@@ -158,9 +150,7 @@ export const PUT = withErrorHandler(
       const today = new Date().toISOString().split('T')[0];
       
       // Check if user has active subscription
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: subscription } = await supabase
+      const { data: subscription } = await supabase
         .from('user_subscriptions')
         .select('status, trial_end_date, current_period_end')
         .eq('user_id', user.id)
@@ -194,9 +184,7 @@ export const PUT = withErrorHandler(
       }
 
       // Get current usage without incrementing
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: usageData, error } = await supabase
+      const { data: usageData, error } = await supabase
         .rpc('get_daily_prompt_usage', { 
           user_uuid: user.id,
           check_date: today 
@@ -208,7 +196,7 @@ export const PUT = withErrorHandler(
         return errorResponse('Failed to check prompt usage', 500);
       }
 
-      const canMakePrompt = (usageData as any)?.can_make_prompt || false;
+      const canMakePrompt = usageData.can_make_prompt || false;
       const resetTime = new Date();
       resetTime.setHours(24, 0, 0, 0); // Next midnight
 
@@ -216,9 +204,9 @@ export const PUT = withErrorHandler(
         canMakePrompt,
         reason: canMakePrompt ? 'Available' : 'Daily limit exceeded',
         usage: {
-          todayCount: (usageData as any)?.current_usage || 0,
-          dailyLimit: (usageData as any)?.daily_limit || 20,
-          remainingPrompts: (usageData as any)?.remaining_prompts || 0,
+          todayCount: usageData.current_usage || 0,
+          dailyLimit: usageData.daily_limit || 20,
+          remainingPrompts: usageData.remaining_prompts || 0,
           resetTime: resetTime.toISOString(),
           date: today,
         }

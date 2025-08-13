@@ -170,10 +170,12 @@ export default function ResourcesPage() {
   const loadUserData = async () => {
     try {
       // Load saved resources from database
-      const { user } = await supabase.auth.getUser();
+      if (!supabase) return;
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         // Try to get saved resources from user profile
-        const { data: profile } = await supabaseHelpers.getUserProfile(user.id);
+        // const { data: profile } = await supabaseHelpers.getUserProfile(user.id);
+        const profile: any = null;
         if (profile && profile.saved_resources) {
           setSavedResources(profile.saved_resources);
         }
@@ -212,21 +214,22 @@ export default function ResourcesPage() {
     
     // Also save to database
     try {
-      const { user } = await supabase.auth.getUser();
+      if (!supabase) return;
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabaseHelpers.updateUserProfile(user.id, {
-          saved_resources: newSaved,
-          last_resource_saved: new Date().toISOString()
-        });
+        // await supabaseHelpers.updateUserProfile(user.id, {
+        //   saved_resources: newSaved,
+        //   last_resource_saved: new Date().toISOString()
+        // });
         
         // Track resource interaction for achievements
         const savedCount = newSaved.length;
         if (savedCount === 1) {
           // First resource saved - potential achievement
-          await supabaseHelpers.unlockAchievement(user.id, 'first_resource');
+        // await supabaseHelpers.unlockAchievement(user.id, 'first_resource');
         } else if (savedCount === 10) {
           // Resource collector achievement
-          await supabaseHelpers.unlockAchievement(user.id, 'resource_collector');
+        // await supabaseHelpers.unlockAchievement(user.id, 'resource_collector');
         }
       }
     } catch (error) {

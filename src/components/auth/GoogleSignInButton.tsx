@@ -20,6 +20,7 @@ export function GoogleSignInButton({
     if (disabled) return
     
     try {
+      if (!supabase) return;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -51,7 +52,7 @@ export function GoogleSignInButton({
       onClick={handleGoogleSignIn}
       disabled={disabled}
       variant="outline"
-      size="large"
+      size="lg"
       className={`w-full flex items-center justify-center gap-3 ${className}`}
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24">

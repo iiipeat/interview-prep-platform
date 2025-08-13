@@ -15,7 +15,7 @@ async function getUserFromToken(request: NextRequest) {
   }
   
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token)
   
   if (error || !user) {
     return null
@@ -39,7 +39,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
       return errorResponse("Database not configured", 500);
     }
     // Get user dashboard summary from view
-    const { data: dashboardData, error: dashboardError } = await supabaseAdmin
+    const { data: dashboardData, error: dashboardError } = await supabaseAdmin!
       .from('user_dashboard_summary')
       .select('*')
       .eq('user_id', user.id)
@@ -50,7 +50,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Get recent practice sessions
-    const { data: recentSessions, error: sessionsError } = await supabaseAdmin
+    const { data: recentSessions, error: sessionsError } = await supabaseAdmin!
       .from('practice_sessions')
       .select(`
         id,
@@ -73,7 +73,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Get recent achievements
-    const { data: recentAchievements, error: achievementsError } = await supabaseAdmin
+    const { data: recentAchievements, error: achievementsError } = await supabaseAdmin!
       .from('user_achievements')
       .select('*')
       .eq('user_id', user.id)
@@ -85,7 +85,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Get current subscription status
-    const { data: subscription, error: subscriptionError } = await supabaseAdmin
+    const { data: subscription, error: subscriptionError } = await supabaseAdmin!
       .from('user_subscriptions')
       .select(`
         *,
@@ -108,7 +108,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
     
-    const { data: progressMetrics, error: progressError } = await supabaseAdmin
+    const { data: progressMetrics, error: progressError } = await supabaseAdmin!
       .from('user_progress')
       .select('*')
       .eq('user_id', user.id)

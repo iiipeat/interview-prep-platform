@@ -66,6 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
+      if (!supabase) return null;
       const { data, error } = await supabase
         .from('users')
         .select(`
@@ -133,6 +134,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         
         // Fallback to Supabase session
+      if (!supabase) return { success: false, error: 'No supabase client' };
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -153,8 +155,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initializeAuth()
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+    let subscription: any = null;
+    if (supabase) {
+      const { data } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
         if (!mounted) return
 
         console.log('Auth state changed:', event, session?.user?.id)
@@ -181,11 +185,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
             await updateAuthState(session)
         }
       }
-    )
+      )
+      subscription = data.subscription
+    }
 
     return () => {
       mounted = false
-      subscription.unsubscribe()
+      subscription?.unsubscribe()
     }
   }, [])
 
@@ -194,6 +200,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const signIn = async (email: string, password: string) => {
     try {
+      if (!supabase) return { success: false, error: 'No supabase client' };
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -215,6 +222,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const signUp = async (email: string, password: string, fullName: string, profileData?: any) => {
     try {
+      if (!supabase) return { success: false, error: 'No supabase client' };
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -246,7 +254,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (googleUser) {
         // We have Google user data from the Google Sign-In
         // Create a mock user session
-        const mockUser: User = {
+        const mockUser = {
           id: googleUser.id,
           email: googleUser.email,
           user_metadata: {
@@ -256,9 +264,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         
         const mockSession: Session = {
-          user: mockUser,
+          user: mockUser as unknown as User,
           access_token: 'google-access-token',
-          refresh_token: 'google-refresh-token'
+          refresh_token: 'google-refresh-token',
+          expires_in: 3600,
+          token_type: 'bearer'
         }
         
         // Update auth state immediately
@@ -307,6 +317,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return { success: true, data: mockSession }
       } else {
         // Fallback to old OAuth flow (shouldn't be used)
+      if (!supabase) return { success: false, error: 'No supabase client' };
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -344,6 +355,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.removeItem('currentUserId')
       }
       
+      if (!supabase) return { success: false, error: 'No supabase client' };
       const { error } = await supabase.auth.signOut()
       
       if (error) {
@@ -362,6 +374,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const resetPassword = async (email: string) => {
     try {
+      if (!supabase) return { success: false, error: 'No supabase client' };
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`
       })

@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       return errorResponse('Database not configured', 500);
     }
     
-    const { data: users, error: usersError } = await supabaseAdmin
+    const { data: users, error: usersError } = await supabaseAdmin!
       .from('users')
       .select(`
         id,

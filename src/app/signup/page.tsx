@@ -75,6 +75,7 @@ export default function SignUpPage() {
     
     try {
       // Create account with unique user ID
+      if (!supabase) return;
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -122,6 +123,7 @@ export default function SignUpPage() {
       }
       
       // Update the user profile with additional information
+      if (!supabase) return;
       await supabase
         .from('user_profiles')
         .upsert({
@@ -187,7 +189,7 @@ export default function SignUpPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 placeholder="John Doe"
-                icon={<User className="w-4 h-4" />}
+                leftIcon={<User className="w-4 h-4" />}
               />
             </div>
 
@@ -200,7 +202,7 @@ export default function SignUpPage() {
                 value={formData.targetRole}
                 onChange={(e) => setFormData({...formData, targetRole: e.target.value})}
                 placeholder="e.g., Marketing Manager, Software Engineer"
-                icon={<Briefcase className="w-4 h-4" />}
+                leftIcon={<Briefcase className="w-4 h-4" />}
               />
             </div>
 
@@ -365,7 +367,7 @@ export default function SignUpPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   placeholder="you@example.com"
-                  icon={<Mail className="w-4 h-4" />}
+                  leftIcon={<Mail className="w-4 h-4" />}
                 />
               </div>
 
@@ -379,7 +381,7 @@ export default function SignUpPage() {
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                   placeholder="Minimum 8 characters"
-                  icon={<Lock className="w-4 h-4" />}
+                  leftIcon={<Lock className="w-4 h-4" />}
                 />
               </div>
 
@@ -393,7 +395,7 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                   placeholder="Re-enter your password"
-                  icon={<Lock className="w-4 h-4" />}
+                  leftIcon={<Lock className="w-4 h-4" />}
                 />
               </div>
 

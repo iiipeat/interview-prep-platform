@@ -52,6 +52,7 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
 
   const checkAuthStatus = async () => {
     try {
+      if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setIsAuthenticated(true);
@@ -80,6 +81,7 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
         localStorage.clear();
       }
       
+      if (!supabase) return;
       await supabase.auth.signOut();
       setIsAuthenticated(false);
       setUserProfile(null);
@@ -121,7 +123,7 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
     if (userProfile?.email) {
       const emailName = userProfile.email.split('@')[0];
       // Convert email prefix to a more readable format
-      return emailName.replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      return emailName.replace(/[._-]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     }
     return 'User';
   };

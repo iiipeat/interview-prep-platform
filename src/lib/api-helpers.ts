@@ -169,7 +169,7 @@ export function parseFilterParams(
 ): Record<string, string> {
   const filters: Record<string, string> = {}
   
-  for (const [key, value] of searchParams.entries()) {
+  for (const [key, value] of Array.from(searchParams.entries())) {
     // Skip pagination and sorting params
     if (['page', 'limit', 'sort_by', 'sort_order'].includes(key)) {
       continue

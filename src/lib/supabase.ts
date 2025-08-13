@@ -496,6 +496,7 @@ export interface Database {
  */
 export async function getUser() {
   try {
+    if (!supabase) return null
     const { data: { user } } = await supabase.auth.getUser()
     return user
   } catch (error) {
@@ -509,6 +510,7 @@ export async function getUser() {
  */
 export async function getSession() {
   try {
+    if (!supabase) return null
     const { data: { session } } = await supabase.auth.getSession()
     return session
   } catch (error) {
@@ -522,6 +524,7 @@ export async function getSession() {
  */
 export async function signOut() {
   try {
+    if (!supabase) return { success: false, error: 'Supabase not initialized' }
     const { error } = await supabase.auth.signOut()
     if (error) throw error
     return { success: true }
@@ -536,6 +539,7 @@ export async function signOut() {
  */
 export async function signInWithGoogle(redirectTo?: string) {
   try {
+    if (!supabase) return { data: null, error: { message: 'Supabase not initialized' } }
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -561,6 +565,7 @@ export async function signInWithGoogle(redirectTo?: string) {
  */
 export async function signUpWithEmail(email: string, password: string, fullName: string, profileData?: any) {
   try {
+    if (!supabase) return { success: false, error: { message: 'Supabase not initialized' } }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -587,6 +592,7 @@ export async function signUpWithEmail(email: string, password: string, fullName:
  */
 export async function signInWithEmail(email: string, password: string) {
   try {
+    if (!supabase) return { success: false, error: { message: 'Supabase not initialized' } }
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -605,6 +611,7 @@ export async function signInWithEmail(email: string, password: string) {
  */
 export async function resetPassword(email: string) {
   try {
+    if (!supabase) return { success: false, error: { message: 'Supabase not initialized' } }
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`
     })
@@ -622,6 +629,7 @@ export async function resetPassword(email: string) {
  */
 export async function updatePassword(password: string) {
   try {
+    if (!supabase) return { success: false, error: { message: 'Supabase not initialized' } }
     const { data, error } = await supabase.auth.updateUser({
       password
     })

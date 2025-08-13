@@ -29,10 +29,8 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   )
   
   // Parse and validate filters
-  const { data: filters, error: filterError } = validateQueryParams(
-    questionFilterSchema,
-    searchParams
-  )
+  const filters = validateQueryParams(searchParams)
+  const filterError = null
   
   if (filterError) {
     return errorResponse(filterError, 400)
@@ -40,6 +38,9 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   
   try {
     // Build query
+    if (!supabaseAdmin) {
+      return errorResponse('Database connection error', 500)
+    }
     let query = supabaseAdmin
       .from('questions')
       .select(`

@@ -22,7 +22,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Refresh the session with Supabase
-    if (!supabase) return;
+    if (!supabase) {
+      return errorResponse('Database connection error', 500)
+    }
     const { data: authData, error: authError } = await supabase.auth.refreshSession({
       refresh_token: refreshToken,
     })

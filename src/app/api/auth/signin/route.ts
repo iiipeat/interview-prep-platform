@@ -33,7 +33,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       return errorResponse("Database not configured", 500);
     }
     // Authenticate with Supabase
-    if (!supabase) return;
+    if (!supabase) {
+      return errorResponse('Database connection error', 500)
+    }
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -48,7 +50,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Update last login timestamp and sync to Google Sheets
-    await supabaseAdmin
+    await supabaseAdmin!
       .from('users')
       .update({ last_login_at: new Date().toISOString() })
       .eq('id', authData.user.id)
@@ -59,7 +61,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     })
     
     // Get user profile information
-    const { data: userProfile, error: profileError } = await supabaseAdmin
+    const { data: userProfile, error: profileError } = await supabaseAdmin!
       .from('users')
       .select(`
         *,

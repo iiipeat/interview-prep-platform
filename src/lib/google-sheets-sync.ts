@@ -25,7 +25,7 @@ class GoogleSheetsSyncService {
 
       // If userData not provided, fetch from database
       if (!userData) {
-        const { data: user, error } = await supabaseAdmin
+        const { data: user, error } = await supabaseAdmin!
           .from('users')
           .select(`
             id,
@@ -93,7 +93,7 @@ class GoogleSheetsSyncService {
       this.isSyncing = true;
 
       // Fetch all users
-      const { data: users, error } = await supabaseAdmin
+      const { data: users, error } = await supabaseAdmin!
         .from('users')
         .select(`
           id,
@@ -148,7 +148,7 @@ class GoogleSheetsSyncService {
       console.error('Error syncing all users to Google Sheets:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
       };
     } finally {
       this.isSyncing = false;
@@ -218,7 +218,7 @@ class GoogleSheetsSyncService {
   async updateUserLogin(userId: string, email?: string) {
     try {
       // Update last login time in database
-      const { data: user, error } = await supabaseAdmin
+      const { data: user, error } = await supabaseAdmin!
         .from('users')
         .update({ last_login_at: new Date().toISOString() })
         .eq('id', userId)

@@ -416,7 +416,7 @@ export function SignupForm({ redirectTo = '/dashboard', className = '' }: Signup
 
               <Button
                 type="submit"
-                size="large"
+                size="lg"
                 className="w-full"
                 disabled={isSubmitting}
                 loading={isSubmitting}
@@ -493,7 +493,7 @@ export function SignupForm({ redirectTo = '/dashboard', className = '' }: Signup
               <Button
                 type="button"
                 variant="outline"
-                size="large"
+                size="lg"
                 className="flex-1"
                 disabled={isSubmitting}
                 onClick={skipProfile}
@@ -503,7 +503,7 @@ export function SignupForm({ redirectTo = '/dashboard', className = '' }: Signup
               
               <Button
                 type="submit"
-                size="large"
+                size="lg"
                 className="flex-1"
                 disabled={isSubmitting}
                 loading={isSubmitting}

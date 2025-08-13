@@ -17,7 +17,10 @@ async function getUserFromToken(request: NextRequest) {
   }
   
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  if (!supabaseAdmin) {
+    return null
+  }
+  const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token)
   
   if (error || !user) {
     return null
@@ -43,7 +46,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     if (!supabaseAdmin) {
       return errorResponse("Database not configured", 500);
     }
-    const { data: achievements, error, count } = await supabaseAdmin
+    const { data: achievements, error, count } = await supabaseAdmin!
       .from('user_achievements')
       .select('*', { count: 'exact' })
       .eq('user_id', user.id)
@@ -83,7 +86,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   
   try {
     // Check if achievement already exists
-    const { data: existingAchievement } = await supabaseAdmin
+    const { data: existingAchievement } = await supabaseAdmin!
       .from('user_achievements')
       .select('id')
       .eq('user_id', user.id)
@@ -95,7 +98,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Award achievement
-    const { data: achievement, error } = await supabaseAdmin
+    const { data: achievement, error } = await supabaseAdmin!
       .from('user_achievements')
       .insert({
         user_id: user.id,

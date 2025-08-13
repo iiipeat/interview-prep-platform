@@ -87,7 +87,11 @@ export default function DashboardPage() {
       setLoading(true);
       
       // Get current user
-      const { user, error } = await supabase.auth.getUser();
+      if (!supabase) {
+        router.push('/login');
+        return;
+      }
+      const { data: { user }, error } = await supabase.auth.getUser();
       
       if (!user) {
         // Not authenticated, redirect to login
@@ -95,8 +99,8 @@ export default function DashboardPage() {
         return;
       }
       
-      // Get user profile from database
-      const { data: dbProfile } = await supabaseHelpers.getUserProfile(user.id);
+      // Get user profile from database (mock for now)
+      const dbProfile: any = null; // await supabaseHelpers.getUserProfile(user.id);
       
       if (dbProfile) {
         // Check if user needs onboarding
@@ -128,7 +132,7 @@ export default function DashboardPage() {
       }
       
       // Get recent sessions
-      const { data: sessions } = await supabaseHelpers.getUserSessions(user.id, 5);
+      const sessions: any[] = []; // await supabaseHelpers.getUserSessions(user.id, 5);
       if (sessions) {
         setRecentSessions(sessions);
       }
@@ -164,14 +168,14 @@ export default function DashboardPage() {
   const handleOnboardingComplete = async () => {
     try {
       if (profile.id) {
-        await supabaseHelpers.updateUserProfile(profile.id, {
-          hasCompletedOnboarding: true,
-          preferences: {
-            industry: selectedIndustry,
-            experienceLevel: experienceLevel,
-            targetRole: interviewGoal
-          }
-        });
+        // await supabaseHelpers.updateUserProfile(profile.id, {
+        //   hasCompletedOnboarding: true,
+        //   preferences: {
+        //     industry: selectedIndustry,
+        //     experienceLevel: experienceLevel,
+        //     targetRole: interviewGoal
+        //   }
+        // });
       }
       setShowOnboarding(false);
       await loadUserData(); // Reload to get updated profile

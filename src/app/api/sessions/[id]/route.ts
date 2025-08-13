@@ -19,7 +19,7 @@ async function getUserFromToken(request: NextRequest) {
   }
   
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token)
   
   if (error || !user) {
     return null
@@ -53,7 +53,7 @@ export const GET = withErrorHandler(async (
       return errorResponse("Database not configured", 500);
     }
     // Get session with responses
-    const { data: session, error } = await supabaseAdmin
+    const { data: session, error } = await supabaseAdmin!
       .from('practice_sessions')
       .select(`
         *,
@@ -130,7 +130,7 @@ export const PUT = withErrorHandler(async (
   
   try {
     // Verify session belongs to user
-    const { data: existingSession, error: checkError } = await supabaseAdmin
+    const { data: existingSession, error: checkError } = await supabaseAdmin!
       .from('practice_sessions')
       .select('id, status, user_id')
       .eq('id', id)
@@ -169,7 +169,7 @@ export const PUT = withErrorHandler(async (
       updateData.feedback_summary = validatedData.feedbackSummary
     }
     
-    const { data: updatedSession, error: updateError } = await supabaseAdmin
+    const { data: updatedSession, error: updateError } = await supabaseAdmin!
       .from('practice_sessions')
       .update(updateData)
       .eq('id', id)
@@ -211,7 +211,7 @@ export const DELETE = withErrorHandler(async (
   
   try {
     // Delete session (cascades to user_responses)
-    const { error } = await supabaseAdmin
+    const { error } = await supabaseAdmin!
       .from('practice_sessions')
       .delete()
       .eq('id', id)

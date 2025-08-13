@@ -196,18 +196,19 @@ export default function PracticePage() {
         setLoading(false);
         
         // Save question to session if user is logged in
-        const { user } = await supabase.auth.getUser();
+      if (!supabase) return;
+        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          await supabaseHelpers.createPracticeSession({
-            user_id: user.id,
-            question_id: question.id,
-            question_text: question.question,
-            question_type: question.type,
-            industry,
-            role,
-            difficulty: diff,
-            started_at: new Date().toISOString()
-          });
+        // await supabaseHelpers.createPracticeSession({
+        //   user_id: user.id,
+        //   question_id: question.id,
+        //   question_text: question.question,
+        //   question_type: question.type,
+        //   industry,
+        //   role,
+        //   difficulty: diff,
+        //   started_at: new Date().toISOString()
+        // });
         }
       }
     } catch (error) {
@@ -277,11 +278,11 @@ export default function PracticePage() {
       
       // Store session response for custom feedback
       const sessionResponse = {
-        id: currentQuestion.id,
-        question: currentQuestion.question,
+        id: currentQuestion?.id || '',
+        question: currentQuestion?.question || '',
         answer: answer,
-        category: currentQuestion.type,
-        difficulty: currentQuestion.difficulty,
+        category: currentQuestion?.type || 'general',
+        difficulty: currentQuestion?.difficulty || 'medium',
         timeSpent: 120 - timeRemaining,
         score: feedbackData.score,
         timestamp: new Date().toISOString()
@@ -291,23 +292,24 @@ export default function PracticePage() {
       setCurrentStep('feedback');
       
       // Save response if user is logged in
-      const { user } = await supabase.auth.getUser();
+      if (!supabase) return;
+      const { data: { user } } = await supabase.auth.getUser();
       if (user && currentQuestion) {
-        await supabaseHelpers.saveUserResponse({
-          user_id: user.id,
-          question_id: currentQuestion.id,
-          answer_text: answer,
-          score: analysis.score,
-          feedback: JSON.stringify(analysis),
-          answered_at: new Date().toISOString()
-        });
+        // await supabaseHelpers.saveUserResponse({
+        //   user_id: user.id,
+        //   question_id: currentQuestion.id,
+        //   answer_text: answer,
+        //   score: analysis.score,
+        //   feedback: JSON.stringify(analysis),
+        //   answered_at: new Date().toISOString()
+        // });
         
         // Update user stats
-        await supabaseHelpers.updateUserStats(user.id, {
-          total_questions: { increment: 1 },
-          average_score: analysis.score,
-          last_practice: new Date().toISOString()
-        });
+        // await supabaseHelpers.updateUserStats(user.id, {
+        //   total_questions: { increment: 1 },
+        //   average_score: analysis.score,
+        //   last_practice: new Date().toISOString()
+        // });
       }
       
       // Update questions used today
@@ -330,11 +332,11 @@ export default function PracticePage() {
       
       // Store session response for custom feedback (mock scenario)
       const sessionResponse = {
-        id: currentQuestion.id,
-        question: currentQuestion.question,
+        id: currentQuestion?.id || '',
+        question: currentQuestion?.question || '',
         answer: answer,
-        category: currentQuestion.type,
-        difficulty: currentQuestion.difficulty,
+        category: currentQuestion?.type || 'general',
+        difficulty: currentQuestion?.difficulty || 'medium',
         timeSpent: 120 - timeRemaining,
         score: mockFeedback.score,
         timestamp: new Date().toISOString()

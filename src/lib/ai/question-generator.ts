@@ -199,7 +199,7 @@ class QuestionGeneratorService {
    * Build prompt for Claude API
    */
   private buildPrompt(request: QuestionGenerationRequest): string {
-    const industry = INDUSTRY_PROMPTS[request.industry.toLowerCase()] || INDUSTRY_PROMPTS.default;
+    const industry = INDUSTRY_PROMPTS[request.industry.toLowerCase() as keyof typeof INDUSTRY_PROMPTS] || INDUSTRY_PROMPTS.default;
     const questionCount = request.questionCount || 10;
 
     return `Generate ${questionCount} realistic interview questions for a ${request.experienceLevel} level ${request.role} position in the ${request.industry} industry.
@@ -227,7 +227,7 @@ Format each question as JSON with: question, type, difficulty, category, followU
     request: QuestionGenerationRequest
   ): GeneratedQuestion[] {
     const questions: GeneratedQuestion[] = [];
-    const industry = INDUSTRY_PROMPTS[request.industry.toLowerCase()] || INDUSTRY_PROMPTS.default;
+    const industry = INDUSTRY_PROMPTS[request.industry.toLowerCase() as keyof typeof INDUSTRY_PROMPTS] || INDUSTRY_PROMPTS.default;
     const questionCount = request.questionCount || 10;
 
     // Generate behavioral questions (40%)
@@ -268,7 +268,7 @@ Format each question as JSON with: question, type, difficulty, category, followU
       executive: ['made a strategic decision', 'transformed a department', 'navigated market challenges'],
     };
 
-    const scenario = scenarios[request.experienceLevel][Math.floor(Math.random() * 3)];
+    const scenario = scenarios[request.experienceLevel as keyof typeof scenarios]?.[Math.floor(Math.random() * 3)] || 'handled a challenging situation';
 
     return {
       question: `Tell me about a time when you ${scenario} in your ${request.role || 'professional'} experience.`,
@@ -301,7 +301,7 @@ Format each question as JSON with: question, type, difficulty, category, followU
       default: ['industry best practices', 'quality standards', 'process improvement', 'data management'],
     };
 
-    const topics = technicalTopics[request.industry.toLowerCase()] || technicalTopics.default;
+    const topics = technicalTopics[request.industry.toLowerCase() as keyof typeof technicalTopics] || technicalTopics.default;
     const topic = topics[Math.floor(Math.random() * topics.length)];
 
     return {
@@ -335,7 +335,7 @@ Format each question as JSON with: question, type, difficulty, category, followU
       executive: ['market disruption', 'merger integration', 'cultural transformation'],
     };
 
-    const situation = situations[request.experienceLevel][Math.floor(Math.random() * 3)];
+    const situation = situations[request.experienceLevel as keyof typeof situations]?.[Math.floor(Math.random() * 3)] || 'a challenging situation';
 
     return {
       question: `If you were faced with ${situation} in your role as ${request.role}, how would you handle it?`,

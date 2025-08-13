@@ -16,9 +16,7 @@ export const GET = withErrorHandler(
   withAuth(async (request: NextRequest, { user }) => {
     try {
       // Get user's current subscription
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: subscription, error } = await supabase
+      const { data: subscription, error } = await supabase
         .from('user_subscriptions')
         .select(`
           *,
@@ -46,9 +44,7 @@ export const GET = withErrorHandler(
 
       // Get today's prompt usage
       const today = new Date().toISOString().split('T')[0];
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }      const { data: promptUsage, error: usageError } = await supabase
+      const { data: promptUsage, error: usageError } = await supabase
         .from('prompt_usage')
         .select('prompt_count, prompt_limit')
         .eq('user_id', user.id)
@@ -68,9 +64,7 @@ export const GET = withErrorHandler(
         dailyLimit = promptUsage.prompt_limit || 20;
       } else {
         // Create usage record for today if it doesn't exist
-      if (!supabase) {
-        return errorResponse('Database connection error', 500);
-      }        await supabase
+        await supabase
           .from('prompt_usage')
           .insert({
             user_id: user.id,

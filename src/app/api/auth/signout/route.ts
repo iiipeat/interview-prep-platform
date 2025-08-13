@@ -9,7 +9,9 @@ import { withErrorHandler } from '../../../../lib/error-handler'
  */
 export const POST = withErrorHandler(async (request: NextRequest) => {
   try {
-    if (!supabase) return;
+    if (!supabase) {
+      return errorResponse('Database connection error', 500)
+    }
     const { error } = await supabase.auth.signOut()
     
     if (error) {

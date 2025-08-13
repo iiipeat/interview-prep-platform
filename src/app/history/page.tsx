@@ -114,6 +114,7 @@ export default function HistoryPage() {
       
       // Load sessions from database if available
       if (supabase) {
+      if (!supabase) return;
         const { data: dbSessions } = await supabase
           .from('practice_sessions')
           .select('*')
@@ -145,7 +146,7 @@ export default function HistoryPage() {
           difficulty: 'easy'
         }
       ];
-      transformedSessions.push(...mockSessions);
+      transformedSessions.push(...mockSessions as Session[]);
       
       // Sort by date (newest first)
       transformedSessions.sort((a, b) => 
@@ -158,9 +159,9 @@ export default function HistoryPage() {
     } catch (error) {
       console.error('Error loading session history:', error);
       // Use minimal mock data as fallback
-      setSessions(MOCK_SESSIONS.slice(0, 2));
-      setFilteredSessions(MOCK_SESSIONS.slice(0, 2));
-      calculateStats(MOCK_SESSIONS.slice(0, 2));
+      setSessions([]);
+      setFilteredSessions([]);
+      calculateStats([]);
     } finally {
       setLoading(false);
     }

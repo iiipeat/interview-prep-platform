@@ -34,7 +34,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       return errorResponse("Database not configured", 500);
     }
     // Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    const { data: authData, error: authError } = await supabaseAdmin!.auth.admin.createUser({
       email,
       password,
       email_confirm: process.env.NODE_ENV === 'development', // Auto-confirm in development only
@@ -56,7 +56,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     }
     
     // Create user profile in our database
-    const { error: profileError } = await supabaseAdmin
+    const { error: profileError } = await supabaseAdmin!
       .from('users')
       .insert({
         id: authData.user.id,
@@ -68,13 +68,13 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     
     if (profileError) {
       // Rollback: delete the auth user if profile creation fails
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+      await supabaseAdmin!.auth.admin.deleteUser(authData.user.id)
       return errorResponse('Failed to create user profile', 500)
     }
 
     // Create user career profile if provided
     if (Object.keys(profileData).length > 0) {
-      const { error: careerProfileError } = await supabaseAdmin
+      const { error: careerProfileError } = await supabaseAdmin!
         .from('user_profiles')
         .insert({
           user_id: authData.user.id,
@@ -94,7 +94,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     // Set up 7-day free trial
     try {
       // Get the free trial plan
-      const { data: freePlan, error: planError } = await supabaseAdmin
+      const { data: freePlan, error: planError } = await supabaseAdmin!
         .from('subscription_plans')
         .select('id')
         .eq('name', 'Free Trial')
@@ -107,7 +107,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         const trialEndDate = new Date()
         trialEndDate.setDate(trialEndDate.getDate() + 7) // 7 days from now
 
-        const { error: subscriptionError } = await supabaseAdmin
+        const { error: subscriptionError } = await supabaseAdmin!
           .from('user_subscriptions')
           .insert({
             user_id: authData.user.id,

@@ -17,7 +17,7 @@ async function getUserFromToken(request: NextRequest) {
   }
   
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token)
   
   if (error || !user) {
     return null
@@ -47,6 +47,9 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   
   try {
     // Build query
+    if (!supabaseAdmin) {
+      return errorResponse('Database connection error', 500)
+    }
     let query = supabaseAdmin
       .from('user_progress')
       .select('*', { count: 'exact' })

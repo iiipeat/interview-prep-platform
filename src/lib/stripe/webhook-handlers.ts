@@ -56,7 +56,7 @@ export class WebhookHandler {
     
     try {
       // Find user by subscription ID
-      const { data: userSubscription, error: fetchError } = await supabase
+      const { data: userSubscription, error: fetchError } = await supabase!
         .from('user_subscriptions')
         .select(`
           user_id,
@@ -98,7 +98,7 @@ export class WebhookHandler {
     
     try {
       // Get customer email from Stripe customer ID
-      const { data: user, error: userError } = await supabase
+      const { data: user, error: userError } = await supabase!
         .from('users')
         .select('id, email')
         .eq('email', subscription.customer?.email || '') // In real Stripe, need to fetch customer
@@ -127,7 +127,7 @@ export class WebhookHandler {
         cancel_at_period_end: subscription.cancel_at_period_end || false,
       };
 
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('user_subscriptions')
         .upsert(subscriptionData, {
           onConflict: 'user_id',
@@ -154,7 +154,7 @@ export class WebhookHandler {
     
     try {
       // Extract user ID from metadata or customer email
-      const { data: user } = await supabase
+      const { data: user } = await supabase!
         .from('users')
         .select('id, email')
         .eq('email', session.customer_details?.email)
@@ -178,7 +178,7 @@ export class WebhookHandler {
         trial_end_date: session.trial_end ? new Date(session.trial_end * 1000).toISOString() : null,
       };
 
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('user_subscriptions')
         .upsert(subscriptionData, {
           onConflict: 'user_id',
@@ -205,7 +205,7 @@ export class WebhookHandler {
     
     try {
       // Handle trial to paid conversion
-      const previousAttributes = event.data.previous_attributes;
+      const previousAttributes = (event.data as any).previous_attributes;
       const isTrialEnding = previousAttributes?.status === 'trialing' && subscription.status === 'active';
       
       const updateData = {
@@ -218,7 +218,7 @@ export class WebhookHandler {
         updated_at: new Date().toISOString(),
       };
 
-      const { data: updatedSub, error } = await supabase
+      const { data: updatedSub, error } = await supabase!
         .from('user_subscriptions')
         .update(updateData)
         .eq('stripe_subscription_id', subscription.id)
@@ -253,7 +253,7 @@ export class WebhookHandler {
     console.log('Processing subscription_deleted event:', subscription.id);
     
     try {
-      const { data: canceledSub, error } = await supabase
+      const { data: canceledSub, error } = await supabase!
         .from('user_subscriptions')
         .update({
           status: 'canceled',
@@ -304,7 +304,7 @@ export class WebhookHandler {
       const isFirstFailure = attemptCount === 1;
       
       // Update subscription status
-      const { data: updatedSub, error } = await supabase
+      const { data: updatedSub, error } = await supabase!
         .from('user_subscriptions')
         .update({
           status: 'past_due',
@@ -353,7 +353,7 @@ export class WebhookHandler {
       const amount = invoice.amount_paid || invoice.total;
       
       // Update subscription status to active
-      const { data: updatedSub, error } = await supabase
+      const { data: updatedSub, error } = await supabase!
         .from('user_subscriptions')
         .update({
           status: 'active',
@@ -395,7 +395,7 @@ export class WebhookHandler {
    * Get the single plan ID for this application
    */
   private async getPlanIdForUser(): Promise<string> {
-    const { data: plan, error } = await supabase
+    const { data: plan, error } = await supabase!
       .from('subscription_plans')
       .select('id')
       .eq('is_active', true)
@@ -474,7 +474,7 @@ export async function processWebhookEvent(event: WebhookEvent): Promise<void> {
     const enhancedError = new Error(
       `Webhook processing failed for ${event.type} (${event.id}): ${error instanceof Error ? error.message : String(error)}`
     );
-    enhancedError.cause = error;
+    (enhancedError as any).cause = error;
     throw enhancedError;
   }
 }

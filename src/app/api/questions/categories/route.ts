@@ -15,7 +15,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     if (!supabaseAdmin) {
       return errorResponse("Database not configured", 500);
     }
-    const { data: categories, error } = await supabaseAdmin
+    const { data: categories, error } = await supabaseAdmin!
       .from('question_categories')
       .select('*')
       .eq('is_active', true)

@@ -127,7 +127,7 @@ export function PricingCard({ plan, onSelectPlan, loading, currentPlan }: Pricin
 
 // Helper component for the pricing comparison
 export function PricingComparison({ weeklyPrice, monthlyPrice }: { weeklyPrice: number; monthlyPrice: number }) {
-  const savings = calculateSavings(weeklyPrice, monthlyPrice);
+  const savings = calculateSavings();
   const weeklyEquivalent = weeklyPrice * 4.33; // Average weeks per month
 
   return (

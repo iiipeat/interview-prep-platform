@@ -41,7 +41,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       try {
         const stripeEvent = stripe.verifyWebhookSignature(body, sig)
         event = stripeEvent as any
-        console.log(`Verified webhook signature for event: ${event.type}`)
+        console.log(`Verified webhook signature for event: ${event?.type}`)
       } catch (err) {
         console.error('Webhook signature verification failed:', err)
         return errorResponse('Invalid signature', 400)
@@ -53,7 +53,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         event = JSON.parse(body)
         
         // Validate event structure
-        if (!event || !event.id || !event.type || !event.data) {
+        if (!event || !event?.id || !event?.type || !event?.data) {
           throw new Error('Invalid webhook event structure')
         }
       } catch (parseError) {
@@ -62,7 +62,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       }
     }
     
-    console.log(`Received webhook event: ${event.type} (ID: ${event.id})`)
+    console.log(`Received webhook event: ${event?.type} (ID: ${event?.id})`)
     
     // Validate supported event types
     const supportedEvents = [
@@ -78,32 +78,34 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       'payment_intent.payment_failed'
     ]
     
-    if (!supportedEvents.includes(event.type)) {
-      console.log(`Unsupported webhook event type: ${event.type}`)
+    if (!event?.type || !supportedEvents.includes(event.type)) {
+      console.log(`Unsupported webhook event type: ${event?.type}`)
       return successResponse({ 
         received: true,
-        eventType: event.type,
-        eventId: event.id,
+        eventType: event?.type,
+        eventId: event?.id,
         message: 'Event type not handled'
       })
     }
     
     // Process the webhook event using our centralized handler
-    await processWebhookEvent(event)
+    if (event) {
+      await processWebhookEvent(event)
+    }
     
     const processingTime = Date.now() - startTime
-    console.log(`Webhook processed successfully: ${event.type} in ${processingTime}ms`)
+    console.log(`Webhook processed successfully: ${event?.type} in ${processingTime}ms`)
     
     return successResponse({ 
       received: true,
-      eventType: event.type,
-      eventId: event.id,
+      eventType: event?.type,
+      eventId: event?.id,
       processingTime
     })
     
   } catch (error) {
     const processingTime = Date.now() - startTime
-    const eventInfo = event ? `${event.type} (${event.id})` : 'unknown'
+    const eventInfo = event ? `${event?.type} (${event?.id})` : 'unknown'
     
     console.error(`Webhook processing failed for ${eventInfo} after ${processingTime}ms:`, error)
     

@@ -1,4 +1,6 @@
-# Render Environment Variables
+# Render Environment Variables (ARCHIVED)
+
+**NOTE: This project has been migrated to Vercel. See VERCEL_DEPLOYMENT.md for current deployment instructions.**
 
 To deploy this app on Render, you need to set the following environment variables in your Render dashboard:
 

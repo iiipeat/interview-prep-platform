@@ -1,7 +1,12 @@
 # Production Deployment Guide
 
 ## Overview
-This guide walks through deploying the Interview Prep Platform to production on Render.com with all services configured.
+This guide walks through deploying the Interview Prep Platform to production. **This project has been migrated to Vercel** for better Next.js integration and performance.
+
+**📋 For current deployment instructions, see [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)**
+
+## Legacy Render Deployment
+The information below is archived for reference. This project previously deployed to Render.com.
 
 ## Prerequisites Checklist
 
@@ -72,12 +77,14 @@ NEXT_PUBLIC_APP_URL=https://yourdomain.com
 NODE_ENV=production
 ```
 
-## Phase 3: Deploy to Render
+## Phase 3: Deploy to Render (LEGACY - Use Vercel Instead)
+
+**⚠️ This section is archived. Use Vercel deployment instead.**
 
 ### 3.1 Prepare Repository
 1. Commit all changes (without .env files!)
 2. Push to GitHub
-3. Ensure `render.yaml` is in root directory
+3. ~~Ensure `render.yaml` is in root directory~~ (Removed - now using `vercel.json`)
 
 ### 3.2 Connect to Render
 1. Log in to [https://render.com](https://render.com)

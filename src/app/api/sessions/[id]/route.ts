@@ -50,7 +50,7 @@ export const GET = withErrorHandler(async (
   
   try {
     if (!supabaseAdmin) {
-      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+      return errorResponse("Database not configured", 500);
     }
     // Get session with responses
     const { data: session, error } = await supabaseAdmin

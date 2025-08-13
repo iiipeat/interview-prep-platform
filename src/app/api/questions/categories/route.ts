@@ -13,7 +13,7 @@ import { withErrorHandler } from '../../../../lib/error-handler'
 export const GET = withErrorHandler(async (request: NextRequest) => {
   try {
     if (!supabaseAdmin) {
-      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+      return errorResponse("Database not configured", 500);
     }
     const { data: categories, error } = await supabaseAdmin
       .from('question_categories')

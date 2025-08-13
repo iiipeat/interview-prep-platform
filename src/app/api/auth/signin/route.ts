@@ -30,7 +30,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   
   try {
     if (!supabaseAdmin) {
-      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+      return errorResponse("Database not configured", 500);
     }
     // Authenticate with Supabase
     if (!supabase) return;

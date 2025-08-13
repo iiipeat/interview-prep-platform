@@ -60,7 +60,7 @@ export const POST = withErrorHandler(async (
   
   try {
     if (!supabaseAdmin) {
-      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+      return errorResponse("Database not configured", 500);
     }
     // Verify session belongs to user and is in progress
     const { data: session, error: sessionError } = await supabaseAdmin

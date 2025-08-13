@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   if (code) {
     try {
     if (!supabaseAdmin) {
-      return new Response(JSON.stringify({ error: "Database not configured" }), { status: 500 });
+      return errorResponse("Database not configured", 500);
     }
       const supabase = createRouteHandlerClient({ cookies })
       

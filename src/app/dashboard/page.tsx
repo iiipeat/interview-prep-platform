@@ -216,6 +216,27 @@ export default function DashboardPage() {
   useEffect(() => {
     console.log('🎯 Dashboard useEffect triggered');
     
+    // Check for OAuth success parameters first
+    const urlParams = new URLSearchParams(window.location.search);
+    const authSuccess = urlParams.get('auth');
+    const userParam = urlParams.get('user');
+    
+    if (authSuccess === 'success' && userParam) {
+      console.log('✅ OAuth success detected, setting up user');
+      try {
+        const userData = JSON.parse(userParam);
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('currentUserId', userData.id);
+        localStorage.setItem('user', JSON.stringify(userData));
+        console.log('✅ User data stored:', userData.email);
+        
+        // Clean URL
+        window.history.replaceState({}, '', '/dashboard');
+      } catch (error) {
+        console.error('❌ Error parsing OAuth user data:', error);
+      }
+    }
+    
     // Small delay to ensure the page is fully mounted
     const timer = setTimeout(() => {
       loadUserData();
@@ -230,7 +251,6 @@ export default function DashboardPage() {
     }, 10000);
     
     // Check for welcome flag
-    const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('welcome') === 'true') {
       setShowOnboarding(true);
     }

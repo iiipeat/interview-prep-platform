@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button, GlassCard, Input } from '../../../components/ui';
-import { Mail, ArrowLeft } from '../../../lib/icons';
+import { Mail, ChevronLeft } from '../../../lib/icons';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
 
         <div className="mt-6 text-center">
           <Link href="/login" className="flex items-center justify-center text-blue-600 hover:text-blue-700">
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ChevronLeft className="w-4 h-4 mr-2" />
             Back to Login
           </Link>
         </div>

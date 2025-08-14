@@ -83,8 +83,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const loadUserData = async () => {
+    console.log('🔄 Starting loadUserData...');
+    
     try {
       setLoading(true);
+      
+      // Add a small delay to ensure localStorage is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Check authentication - both Supabase and localStorage
       let currentUser: any = null;
@@ -95,23 +100,33 @@ export default function DashboardPage() {
       const localUserId = localStorage.getItem('currentUserId');
       const localUserData = localStorage.getItem('user');
       
+      console.log('🔍 Auth check:', { isLocalAuth, localUserId: !!localUserId, localUserData: !!localUserData });
+      
       if (isLocalAuth && localUserId && localUserData) {
         // User is authenticated via localStorage (OAuth)
-        currentUser = JSON.parse(localUserData);
-        userId = localUserId;
-        console.log('✅ Found localStorage auth:', currentUser.email);
+        try {
+          currentUser = JSON.parse(localUserData);
+          userId = localUserId;
+          console.log('✅ Found localStorage auth:', currentUser.email);
+        } catch (parseError) {
+          console.error('❌ Error parsing localStorage user data:', parseError);
+        }
       } else if (supabase) {
         // Fallback to Supabase auth
+        console.log('🔍 Checking Supabase auth...');
         const { data: { user }, error } = await supabase.auth.getUser();
         if (user) {
           currentUser = user;
           userId = user.id;
           console.log('✅ Found Supabase auth:', user.email);
+        } else if (error) {
+          console.log('❌ Supabase auth error:', error);
         }
       }
       
       if (!currentUser || !userId) {
         console.log('❌ No authentication found, redirecting to welcome');
+        setLoading(false); // Important: clear loading before redirect
         router.push('/welcome');
         return;
       }
@@ -187,22 +202,44 @@ export default function DashboardPage() {
       const sessions: any[] = []; // await supabaseHelpers.getUserSessions(userId, 5);
       setRecentSessions(sessions);
       
+      console.log('✅ Dashboard data loaded successfully');
+      
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('❌ Error loading user data:', error);
+      // Still set loading to false even on error
     } finally {
+      console.log('🏁 Setting loading to false');
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadUserData();
+    console.log('🎯 Dashboard useEffect triggered');
+    
+    // Small delay to ensure the page is fully mounted
+    const timer = setTimeout(() => {
+      loadUserData();
+    }, 50);
+    
+    // Fallback timer to force clear loading state after 10 seconds
+    const fallbackTimer = setTimeout(() => {
+      if (loading) {
+        console.log('⚠️ Forcing loading state to false after timeout');
+        setLoading(false);
+      }
+    }, 10000);
     
     // Check for welcome flag
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('welcome') === 'true') {
       setShowOnboarding(true);
     }
-  }, []);
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(fallbackTimer);
+    };
+  }, []); // Empty dependency array to run only once
 
   // Get subscription limits for simplified model
   const getSubscriptionLimits = () => {

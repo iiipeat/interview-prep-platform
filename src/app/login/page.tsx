@@ -28,7 +28,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/test-dashboard`,
           queryParams: {
             access_type: 'offline',
             prompt: 'select_account',
@@ -73,8 +73,8 @@ export default function LoginPage() {
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('currentUserId', authData.user.id);
         
-        // Redirect to dashboard
-        router.push('/dashboard');
+        // Redirect to test dashboard
+        router.push('/test-dashboard');
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred during sign in');

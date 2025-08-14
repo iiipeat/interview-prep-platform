@@ -4,7 +4,6 @@ import { Database } from './supabase'
 
 // Routes that require authentication
 const PROTECTED_ROUTES = [
-  '/',
   '/dashboard',
   '/practice',
   '/progress',
@@ -33,9 +32,11 @@ const AUTH_ROUTES = [
 
 // Public routes (no authentication required)
 const PUBLIC_ROUTES = [
+  '/',
   '/welcome',
   '/login',
   '/signup',
+  '/pricing',
   '/auth/forgot-password',
 ]
 

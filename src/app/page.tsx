@@ -13,27 +13,29 @@ export default function Home() {
   const [isLocalAuth, setIsLocalAuth] = useState(false);
 
   useEffect(() => {
-    // Check localStorage for authentication (fallback for OAuth and test login)
-    const localAuth = localStorage.getItem('isAuthenticated') === 'true';
-    const localUser = localStorage.getItem('user');
-    
-    if (localAuth && localUser) {
-      setIsLocalAuth(true);
-      try {
-        const userData = JSON.parse(localUser);
-        setUserName(userData.name || userData.email?.split('@')[0] || 'User');
-      } catch {
-        setUserName('User');
-      }
-    } else if (!loading) {
-      // Only redirect if both AuthProvider and localStorage show not authenticated
-      if (!isAuthenticated && !localAuth) {
-        window.location.href = '/welcome';
-      } else if (user) {
+    // Always redirect unauthenticated users to welcome page
+    if (!loading) {
+      // Check localStorage for authentication (fallback for OAuth and test login)
+      const localAuth = localStorage.getItem('isAuthenticated') === 'true';
+      const localUser = localStorage.getItem('user');
+      
+      if (localAuth && localUser) {
+        setIsLocalAuth(true);
+        try {
+          const userData = JSON.parse(localUser);
+          setUserName(userData.name || userData.email?.split('@')[0] || 'User');
+        } catch {
+          setUserName('User');
+        }
+      } else if (user && isAuthenticated) {
         setUserName(user.user_metadata?.name || user.email?.split('@')[0] || 'User');
+      } else {
+        // Redirect to welcome page if not authenticated
+        router.push('/welcome');
+        return;
       }
     }
-  }, [user, loading, isAuthenticated]);
+  }, [user, loading, isAuthenticated, router]);
 
   if (loading && !isLocalAuth) {
     return (

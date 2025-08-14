@@ -16,22 +16,35 @@ export default function LoginPage() {
   });
 
   const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError('');
+    
     try {
-      if (!supabase) return;
+      if (!supabase) {
+        setError('Authentication service not available');
+        return;
+      }
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          }
         }
       });
       
       if (error) {
-        setError('Failed to sign in with Google');
-        console.error('Google sign in error:', error);
+        console.error('Error signing in with Google:', error);
+        setError('Failed to sign in with Google. Please try again.');
       }
-    } catch (err) {
-      setError('Failed to sign in with Google');
-      console.error('Google sign in error:', err);
+    } catch (error) {
+      console.error('Google signin error:', error);
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,8 +73,8 @@ export default function LoginPage() {
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('currentUserId', authData.user.id);
         
-        // Redirect to home page
-        router.push('/');
+        // Redirect to dashboard
+        router.push('/dashboard');
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred during sign in');

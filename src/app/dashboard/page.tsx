@@ -86,23 +86,64 @@ export default function DashboardPage() {
     try {
       setLoading(true);
       
-      // Get current user
-      if (!supabase) {
-        router.push('/login');
-        return;
-      }
-      const { data: { user }, error } = await supabase.auth.getUser();
+      // Check authentication - both Supabase and localStorage
+      let currentUser: any = null;
+      let userId: string | null = null;
       
-      if (!user) {
-        // Not authenticated, redirect to login
-        router.push('/login');
+      // First, check localStorage for authentication (OAuth users)
+      const isLocalAuth = localStorage.getItem('isAuthenticated') === 'true';
+      const localUserId = localStorage.getItem('currentUserId');
+      const localUserData = localStorage.getItem('user');
+      
+      if (isLocalAuth && localUserId && localUserData) {
+        // User is authenticated via localStorage (OAuth)
+        currentUser = JSON.parse(localUserData);
+        userId = localUserId;
+        console.log('✅ Found localStorage auth:', currentUser.email);
+      } else if (supabase) {
+        // Fallback to Supabase auth
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (user) {
+          currentUser = user;
+          userId = user.id;
+          console.log('✅ Found Supabase auth:', user.email);
+        }
+      }
+      
+      if (!currentUser || !userId) {
+        console.log('❌ No authentication found, redirecting to welcome');
+        router.push('/welcome');
         return;
       }
       
       // Get user profile from database (mock for now)
-      const dbProfile: any = null; // await supabaseHelpers.getUserProfile(user.id);
+      const dbProfile: any = null; // await supabaseHelpers.getUserProfile(userId);
+      
+      // Use mock profile data for now
+      const mockProfile: UserProfile = {
+        id: userId,
+        name: currentUser.name || currentUser.email?.split('@')[0] || 'User',
+        email: currentUser.email,
+        subscriptionStatus: 'trial',
+        promptsUsedToday: 0,
+        dailyPromptLimit: 5, // Free trial limit
+        totalQuestions: 0,
+        streak: 0,
+        achievements: 0,
+        successRate: 0,
+        hasCompletedOnboarding: false,
+        trialEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+        preferences: {
+          industry: '',
+          experienceLevel: 'entry',
+          targetRole: ''
+        }
+      };
       
       if (dbProfile) {
+        // Use database profile if available
+        setProfile(dbProfile);
+        
         // Check if user needs onboarding
         if (!dbProfile.hasCompletedOnboarding) {
           setShowOnboarding(true);
@@ -121,21 +162,30 @@ export default function DashboardPage() {
           }
         }
         
-        setProfile(dbProfile);
-        
         // Load preferences
         if (dbProfile.preferences) {
           setSelectedIndustry(dbProfile.preferences.industry || '');
           setExperienceLevel(dbProfile.preferences.experienceLevel || '');
           setInterviewGoal(dbProfile.preferences.targetRole || '');
         }
+      } else {
+        // Use mock profile
+        console.log('📝 Using mock profile for user:', currentUser.email);
+        setProfile(mockProfile);
+        
+        // Calculate trial days remaining (7 days for new users)
+        const trialEnd = new Date(mockProfile.trialEndDate!);
+        const now = new Date();
+        const remaining = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        setDaysRemaining(remaining);
+        
+        // Show onboarding for new users
+        setShowOnboarding(true);
       }
       
-      // Get recent sessions
-      const sessions: any[] = []; // await supabaseHelpers.getUserSessions(user.id, 5);
-      if (sessions) {
-        setRecentSessions(sessions);
-      }
+      // Get recent sessions (mock for now)
+      const sessions: any[] = []; // await supabaseHelpers.getUserSessions(userId, 5);
+      setRecentSessions(sessions);
       
     } catch (error) {
       console.error('Error loading user data:', error);

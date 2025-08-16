@@ -9,12 +9,18 @@ function GoogleCallbackContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.error('Authentication timeout - redirecting to login');
+      router.push('/login?error=timeout');
+    }, 30000); // 30 second timeout
+
     async function handleGoogleCallback() {
       const code = searchParams.get('code');
       const error = searchParams.get('error');
 
       if (error) {
         console.error('Google OAuth error:', error);
+        clearTimeout(timeout);
         router.push('/login?error=oauth_failed');
         return;
       }
@@ -35,11 +41,13 @@ function GoogleCallbackContent() {
             }),
           });
           
+          const data = await response.json();
+          
           if (!response.ok) {
-            throw new Error('Failed to authenticate with Google');
+            console.error('API response not ok:', response.status, data);
+            throw new Error(data.error || 'Failed to authenticate with Google');
           }
           
-          const data = await response.json();
           console.log('Google authentication successful:', data);
 
           if (data && data.user) {
@@ -99,7 +107,8 @@ function GoogleCallbackContent() {
             // Clear any return URL
             localStorage.removeItem('authReturnUrl');
             
-            // Add a small delay to ensure localStorage is written
+            // Clear timeout and redirect
+            clearTimeout(timeout);
             setTimeout(() => {
               console.log('Redirecting to home page...');
               console.log('Auth status:', localStorage.getItem('isAuthenticated'));
@@ -110,18 +119,26 @@ function GoogleCallbackContent() {
             }, 100);
           } else {
             console.error('No user data in response');
+            clearTimeout(timeout);
             router.push('/login?error=auth_failed');
           }
         } catch (error) {
           console.error('Google authentication error:', error);
+          clearTimeout(timeout);
           router.push('/login?error=oauth_failed');
         }
       } else {
+        clearTimeout(timeout);
         router.push('/login');
       }
     }
 
     handleGoogleCallback();
+    
+    // Cleanup timeout on unmount
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [router, searchParams]);
 
   return (

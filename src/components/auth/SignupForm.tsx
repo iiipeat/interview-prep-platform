@@ -67,7 +67,7 @@ const COMMON_INDUSTRIES = [
  */
 export function SignupForm({ redirectTo = '/dashboard', className = '' }: SignupFormProps) {
   const router = useRouter()
-  const { signUp, signInWithGoogle, loading } = useAuth()
+  const { signUp, signIn, signInWithGoogle, loading } = useAuth()
   
   const [step, setStep] = useState<'basic' | 'profile'>('basic')
   const [formData, setFormData] = useState<FormData>({

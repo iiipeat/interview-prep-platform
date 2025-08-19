@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '../../lib/utils';
 import { Button } from './Button';
-import { supabase } from '../../lib/supabase';
+import { useAuth } from '../auth/AuthProvider';
 import { User, Settings, LogOut, LayoutDashboard, CreditCard, ChevronDown } from '../../lib/icons';
 
 export interface NavigationProps {
@@ -21,9 +21,8 @@ interface NavItem {
 const Navigation: React.FC<NavigationProps> = ({ className }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { isAuthenticated, user, profile, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -34,9 +33,6 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
     { label: 'Achievements', href: '/achievements' }
   ];
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
 
   useEffect(() => {
     // Close dropdown when clicking outside
@@ -50,78 +46,50 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const checkAuthStatus = async () => {
-    try {
-      if (!supabase) return;
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setIsAuthenticated(true);
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-        if (profile) {
-          setUserProfile(profile);
-        }
-      } else {
-        setIsAuthenticated(false);
-        setUserProfile(null);
-      }
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-      setIsAuthenticated(false);
-    }
-  };
 
   const handleSignOut = async () => {
     try {
-      // Clear all localStorage items
-      if (typeof window !== 'undefined') {
-        localStorage.clear();
-      }
-      
-      if (!supabase) return;
-      await supabase.auth.signOut();
-      setIsAuthenticated(false);
-      setUserProfile(null);
+      const result = await signOut();
       setShowProfileMenu(false);
       
-      // Redirect to welcome page
-      router.push('/welcome');
-      
-      // Force page refresh to clear any cached state
-      setTimeout(() => {
-        window.location.href = '/welcome';
-      }, 100);
+      if (result.success) {
+        // Redirect to home page
+        router.push('/');
+      } else {
+        console.error('Sign out error:', result.error);
+        // Still redirect on error
+        router.push('/');
+      }
     } catch (error) {
       console.error('Error signing out:', error);
       // Force redirect even on error
-      window.location.href = '/welcome';
+      router.push('/');
     }
   };
 
   const getUserInitials = () => {
-    if (userProfile?.name && userProfile.name !== 'Google User') {
-      const names = userProfile.name.split(' ');
+    const displayName = profile?.name || user?.user_metadata?.full_name;
+    if (displayName && displayName !== 'Google User') {
+      const names = displayName.split(' ');
       if (names.length >= 2) {
         return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
       }
       return names[0].substring(0, 2).toUpperCase();
     }
-    if (userProfile?.email) {
-      const emailName = userProfile.email.split('@')[0];
+    if (user?.email) {
+      const emailName = user.email.split('@')[0];
       return emailName.substring(0, 2).toUpperCase();
     }
     return 'U';
   };
 
   const getUserDisplayName = () => {
-    if (userProfile?.name && userProfile.name !== 'Google User') {
-      return userProfile.name;
+    const displayName = profile?.name || user?.user_metadata?.full_name;
+    if (displayName && displayName !== 'Google User') {
+      return displayName;
     }
-    if (userProfile?.email) {
-      const emailName = userProfile.email.split('@')[0];
+    if (user?.email) {
+      const emailName = user.email.split('@')[0];
       // Convert email prefix to a more readable format
       return emailName.replace(/[._-]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     }
@@ -194,7 +162,7 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
                     <div className="absolute right-0 mt-2 w-56 rounded-lg bg-white shadow-lg border border-gray-200 py-2">
                       <div className="px-4 py-2 border-b border-gray-100">
                         <p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
-                        <p className="text-xs text-gray-500">{userProfile?.email}</p>
+                        <p className="text-xs text-gray-500">{user?.email}</p>
                       </div>
                       
                       <Link
@@ -322,7 +290,7 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
                 <>
                   <div className="px-3 py-2 border-t border-gray-200">
                     <p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
-                    <p className="text-xs text-gray-500">{userProfile?.email}</p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
                   </div>
                   <Link href="/dashboard" className="block">
                     <Button variant="ghost" size="sm" fullWidth className="justify-start">

@@ -67,11 +67,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
       if (!supabase) return null;
+      
+      console.log('AuthProvider: Fetching user profile for:', userId)
+      
       const { data, error } = await supabase
         .from('users')
         .select(`
-          *,
-          user_profiles (*)
+          id,
+          email,
+          full_name,
+          avatar_url,
+          user_profiles (
+            current_job_role,
+            target_role,
+            experience_level,
+            industry,
+            career_goals
+          )
         `)
         .eq('id', userId)
         .single()
@@ -81,7 +93,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return null
       }
 
-      return data
+      console.log('AuthProvider: User profile fetched:', data)
+      
+      // Format the profile data
+      return {
+        id: data.id,
+        email: data.email,
+        name: data.full_name,
+        career_goals: data.user_profiles?.[0]?.career_goals,
+        target_role: data.user_profiles?.[0]?.target_role,
+        experience_level: data.user_profiles?.[0]?.experience_level,
+      }
     } catch (error) {
       console.error('Error fetching user profile:', error)
       return null
@@ -92,8 +114,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Update auth state when session changes
    */
   const updateAuthState = async (session: Session | null) => {
+    console.log('AuthProvider: Updating auth state with session:', session ? 'Session exists' : 'No session')
+    
     if (session?.user) {
       const profile = await fetchUserProfile(session.user.id)
+      console.log('AuthProvider: Setting authenticated state for user:', session.user.email)
+      
       setAuthState({
         user: session.user,
         profile,
@@ -102,6 +128,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated: true,
       })
     } else {
+      console.log('AuthProvider: Setting unauthenticated state')
+      
       setAuthState({
         user: null,
         profile: null,
@@ -117,36 +145,84 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   useEffect(() => {
     let mounted = true
+    let timeoutId: NodeJS.Timeout
+
+    // Fallback timeout to ensure loading state never stays true indefinitely
+    const setLoadingTimeout = () => {
+      timeoutId = setTimeout(() => {
+        if (mounted) {
+          console.log('AuthProvider: Timeout reached, forcing loading to false')
+          setAuthState(prev => ({ ...prev, loading: false }))
+        }
+      }, 5000) // 5 second timeout
+    }
 
     // Get initial session
     const initializeAuth = async () => {
+      // Set timeout as failsafe
+      setLoadingTimeout()
+      
       try {
-        // Check for stored Google session first
+        // Check for Google user session in localStorage first
         if (typeof window !== 'undefined') {
+          const storedGoogleUser = localStorage.getItem('google_user')
           const storedSession = localStorage.getItem('auth_session')
-          if (storedSession) {
-            const session = JSON.parse(storedSession)
-            if (mounted) {
-              await updateAuthState(session)
-              return
+          
+          if (storedGoogleUser && storedSession) {
+            try {
+              const googleUser = JSON.parse(storedGoogleUser)
+              const session = JSON.parse(storedSession)
+              
+              // Create a profile object from stored data
+              const profile = {
+                id: googleUser.id,
+                name: googleUser.name,
+                email: googleUser.email,
+              }
+              
+              if (mounted) {
+                clearTimeout(timeoutId)
+                setAuthState({
+                  user: session.user,
+                  profile,
+                  session,
+                  loading: false,
+                  isAuthenticated: true,
+                })
+                return
+              }
+            } catch (parseError) {
+              console.error('Error parsing stored session:', parseError)
+              // Clear corrupted data
+              localStorage.removeItem('google_user')
+              localStorage.removeItem('auth_session')
             }
           }
         }
         
         // Fallback to Supabase session
-      if (!supabase) return { success: false, error: 'No supabase client' };
+        if (!supabase) {
+          if (mounted) {
+            clearTimeout(timeoutId)
+            setAuthState(prev => ({ ...prev, loading: false }))
+          }
+          return
+        }
+        
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
-          console.error('Error getting session:', error)
+          console.error('AuthProvider: Error getting session:', error)
         }
 
         if (mounted) {
+          clearTimeout(timeoutId)
           await updateAuthState(session)
         }
       } catch (error) {
-        console.error('Error initializing auth:', error)
+        console.error('AuthProvider: Error initializing auth:', error)
         if (mounted) {
+          clearTimeout(timeoutId)
           setAuthState(prev => ({ ...prev, loading: false }))
         }
       }
@@ -191,6 +267,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return () => {
       mounted = false
+      clearTimeout(timeoutId)
       subscription?.unsubscribe()
     }
   }, [])
@@ -347,19 +424,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const signOut = async () => {
     try {
-      // Clear stored sessions
+      // Clear authentication-related localStorage items only
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('google_user')
-        localStorage.removeItem('auth_session')
-        localStorage.removeItem('isAuthenticated')
-        localStorage.removeItem('currentUserId')
+        const keysToRemove = [
+          'google_user',
+          'auth_session',
+          'isAuthenticated',
+          'currentUserId'
+        ]
+        
+        keysToRemove.forEach(key => {
+          localStorage.removeItem(key)
+        })
       }
       
-      if (!supabase) return { success: false, error: 'No supabase client' };
+      // Clear auth state immediately
+      setAuthState({
+        user: null,
+        profile: null,
+        session: null,
+        loading: false,
+        isAuthenticated: false,
+      })
+      
+      if (!supabase) return { success: true } // Still successful if no supabase
+      
       const { error } = await supabase.auth.signOut()
       
       if (error) {
-        return { success: false, error }
+        console.error('Supabase signOut error:', error)
+        // Don't fail the whole signout if Supabase fails
       }
 
       return { success: true }

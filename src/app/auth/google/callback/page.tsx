@@ -51,72 +51,92 @@ function GoogleCallbackContent() {
           console.log('Google authentication successful:', data);
 
           if (data && data.user) {
-            // For development, directly set up the session
-            // In production, this would go through proper OAuth validation
+            console.log('Google OAuth successful, creating Supabase session for user:', data.user.email);
             
-            // Store user data in localStorage to simulate authentication
-            const userId = data.user.id || `google_${Date.now()}`;
+            const userId = data.user.id;
             
-            console.log('Setting up authentication for user:', userId);
-            
-            localStorage.setItem('user', JSON.stringify({
-              id: userId,
-              email: data.user.email,
-              name: data.user.name,
-              picture: data.user.picture
-            }));
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('currentUserId', userId);
-            
-            // Store Google user data
-            localStorage.setItem('google_user', JSON.stringify(data.user));
-            
-            // Create user in the mock database
-            const usersDb = JSON.parse(localStorage.getItem('users_db') || '{}');
-            if (!usersDb[userId]) {
-              usersDb[userId] = {
-                id: userId,
-                email: data.user.email,
-                name: data.user.name,
-                provider: 'google',
-                created_at: new Date().toISOString()
-              };
-              localStorage.setItem('users_db', JSON.stringify(usersDb));
-            }
-            
-            // Create user profile
-            const profilesDb = JSON.parse(localStorage.getItem('user_profiles_db') || '{}');
-            if (!profilesDb[userId]) {
-              profilesDb[userId] = {
-                id: userId,
-                email: data.user.email,
-                name: data.user.name,
-                subscriptionStatus: 'trial',
-                trialEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-                questionsUsedToday: 0,
-                totalQuestions: 0,
-                streak: 0,
-                achievements: 0,
-                successRate: 0,
-                preferences: {},
-                created_at: new Date().toISOString()
-              };
-              localStorage.setItem('user_profiles_db', JSON.stringify(profilesDb));
-            }
-            
-            // Clear any return URL
-            localStorage.removeItem('authReturnUrl');
-            
-            // Clear timeout and redirect
-            clearTimeout(timeout);
-            setTimeout(() => {
-              console.log('Redirecting to home page...');
-              console.log('Auth status:', localStorage.getItem('isAuthenticated'));
-              console.log('User ID:', localStorage.getItem('currentUserId'));
+            try {
+              // Create a Supabase session using the Google auth data
+              if (supabase) {
+                // Sign in the user with Supabase using the OAuth data
+                const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
+                  email: data.user.email,
+                  password: `google-oauth-${data.user.id}` // Temporary approach
+                });
+                
+                if (sessionError) {
+                  console.log('Supabase session creation failed, using fallback auth');
+                  
+                  // Fallback: Store user data for AuthProvider to pick up
+                  const mockUser = {
+                    id: userId,
+                    email: data.user.email,
+                    user_metadata: {
+                      full_name: data.user.name,
+                      picture: data.user.picture,
+                      provider: 'google'
+                    }
+                  };
+                  
+                  const mockSession = {
+                    user: mockUser,
+                    access_token: data.tokens.access_token,
+                    refresh_token: data.tokens.refresh_token,
+                    expires_in: data.tokens.expires_in,
+                    token_type: 'bearer'
+                  };
+                  
+                  // Store for AuthProvider
+                  localStorage.setItem('google_user', JSON.stringify(data.user));
+                  localStorage.setItem('auth_session', JSON.stringify(mockSession));
+                  localStorage.setItem('isAuthenticated', 'true');
+                  localStorage.setItem('currentUserId', userId);
+                } else {
+                  console.log('Supabase session created successfully');
+                }
+              } else {
+                console.log('No Supabase client, using fallback auth storage');
+                
+                // Fallback: Store user data for AuthProvider to pick up
+                const mockUser = {
+                  id: userId,
+                  email: data.user.email,
+                  user_metadata: {
+                    full_name: data.user.name,
+                    picture: data.user.picture,
+                    provider: 'google'
+                  }
+                };
+                
+                const mockSession = {
+                  user: mockUser,
+                  access_token: data.tokens.access_token,
+                  refresh_token: data.tokens.refresh_token,
+                  expires_in: data.tokens.expires_in,
+                  token_type: 'bearer'
+                };
+                
+                // Store for AuthProvider
+                localStorage.setItem('google_user', JSON.stringify(data.user));
+                localStorage.setItem('auth_session', JSON.stringify(mockSession));
+                localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem('currentUserId', userId);
+              }
               
-              // Force redirect to home page with full page refresh
-              window.location.href = '/';
-            }, 100);
+              // Clear timeout and redirect
+              clearTimeout(timeout);
+              console.log('Redirecting to dashboard...');
+              
+              // Redirect to dashboard where authenticated users should go
+              setTimeout(() => {
+                window.location.href = '/dashboard';
+              }, 100);
+              
+            } catch (authError) {
+              console.error('Error setting up authentication:', authError);
+              clearTimeout(timeout);
+              router.push('/login?error=auth_setup_failed');
+            }
           } else {
             console.error('No user data in response');
             clearTimeout(timeout);

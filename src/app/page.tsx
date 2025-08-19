@@ -13,7 +13,7 @@ export default function Home() {
   const [isLocalAuth, setIsLocalAuth] = useState(false);
 
   useEffect(() => {
-    // Always redirect unauthenticated users to welcome page
+    // Check authentication status once loading is complete
     if (!loading) {
       // Check localStorage for authentication (fallback for OAuth and test login)
       const localAuth = localStorage.getItem('isAuthenticated') === 'true';
@@ -28,16 +28,21 @@ export default function Home() {
           setUserName('User');
         }
       } else if (user && isAuthenticated) {
-        setUserName(user.user_metadata?.name || user.email?.split('@')[0] || 'User');
+        // Use authenticated user's name
+        const name = user.user_metadata?.full_name || 
+                     user.user_metadata?.name || 
+                     user.email?.split('@')[0] || 
+                     'User';
+        setUserName(name);
       } else {
-        // Redirect to welcome page if not authenticated
+        // Only redirect if truly not authenticated
         router.push('/welcome');
-        return;
       }
     }
   }, [user, loading, isAuthenticated, router]);
 
-  if (loading && !isLocalAuth) {
+  // Show loading state while checking authentication
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -45,10 +50,13 @@ export default function Home() {
     );
   }
 
-  // Check both AuthProvider and localStorage for authentication
-  if (!loading && !user && !isAuthenticated && !isLocalAuth) {
-    // Don't render anything, just return null while redirecting
-    return null;
+  // If not authenticated after loading, show nothing (redirecting)
+  if (!isAuthenticated && !isLocalAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Redirecting to welcome page...</div>
+      </div>
+    );
   }
   return (
     <div className="min-h-screen relative overflow-hidden">

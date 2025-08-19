@@ -37,7 +37,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     const { data: authData, error: authError } = await supabaseAdmin!.auth.admin.createUser({
       email,
       password,
-      email_confirm: process.env.NODE_ENV === 'development', // Auto-confirm in development only
+      email_confirm: true, // Auto-confirm emails for now (until email service is set up)
       user_metadata: {
         full_name: fullName,
         ...profileData
@@ -63,7 +63,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         email: authData.user.email!,
         full_name: fullName,
         provider: 'email',
-        email_verified: process.env.NODE_ENV === 'development',
+        email_verified: true,
       })
     
     if (profileError) {
@@ -158,7 +158,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           id: authData.user.id,
           email: authData.user.email,
           fullName,
-          emailVerified: process.env.NODE_ENV === 'development',
+          emailVerified: true,
           createdAt: authData.user.created_at,
         },
         trial: {
@@ -167,9 +167,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           message: '7-day free trial activated! Start exploring all features.',
         }
       },
-      process.env.NODE_ENV === 'development' 
-        ? 'Account created successfully. Welcome to your 7-day free trial!'
-        : 'Account created! Please check your email to verify your address and activate your 7-day free trial.',
+'Account created successfully. Welcome to your 7-day free trial!',
       undefined,
       201
     )

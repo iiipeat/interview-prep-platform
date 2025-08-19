@@ -201,7 +201,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
               // Refresh token 5 minutes before expiry
               const refreshTime = (session.expires_in - 300) * 1000
               refreshInterval = setInterval(async () => {
-                if (mounted) {
+                if (mounted && supabase) {
                   await supabase.auth.refreshSession()
                 }
               }, refreshTime)

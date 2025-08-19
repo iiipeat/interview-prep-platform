@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { User, Session } from '@supabase/supabase-js'
-import { type GoogleUser } from '../../lib/google-auth'
 
 interface UserProfile {
   id: string;
@@ -25,7 +24,7 @@ interface AuthState {
 interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: any }>
   signUp: (email: string, password: string, fullName: string, profileData?: any) => Promise<{ success: boolean; error?: any }>
-  signInWithGoogle: (redirectTo?: string, googleUser?: GoogleUser) => Promise<{ success: boolean; error?: any }>
+  signInWithGoogle: (redirectTo?: string) => Promise<{ success: boolean; error?: any }>
   signOut: () => Promise<{ success: boolean; error?: any }>
   resetPassword: (email: string) => Promise<{ success: boolean; error?: any }>
   refreshProfile: () => Promise<void>
@@ -68,8 +67,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       if (!supabase) return null;
       
-      console.log('AuthProvider: Fetching user profile for:', userId)
-      
       const { data, error } = await supabase
         .from('users')
         .select(`
@@ -92,8 +89,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error('Error fetching user profile:', error)
         return null
       }
-
-      console.log('AuthProvider: User profile fetched:', data)
       
       // Format the profile data
       return {
@@ -114,11 +109,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Update auth state when session changes
    */
   const updateAuthState = async (session: Session | null) => {
-    console.log('AuthProvider: Updating auth state with session:', session ? 'Session exists' : 'No session')
-    
     if (session?.user) {
       const profile = await fetchUserProfile(session.user.id)
-      console.log('AuthProvider: Setting authenticated state for user:', session.user.email)
       
       setAuthState({
         user: session.user,
@@ -128,8 +120,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated: true,
       })
     } else {
-      console.log('AuthProvider: Setting unauthenticated state')
-      
       setAuthState({
         user: null,
         profile: null,
@@ -147,60 +137,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let mounted = true
     let timeoutId: NodeJS.Timeout
 
-    // Fallback timeout to ensure loading state never stays true indefinitely
+    // Timeout to ensure loading state doesn't stay true indefinitely
     const setLoadingTimeout = () => {
       timeoutId = setTimeout(() => {
         if (mounted) {
-          console.log('AuthProvider: Timeout reached, forcing loading to false')
           setAuthState(prev => ({ ...prev, loading: false }))
         }
-      }, 5000) // 5 second timeout
+      }, 5000)
     }
 
-    // Get initial session
+    // Get initial session from Supabase only
     const initializeAuth = async () => {
-      // Set timeout as failsafe
       setLoadingTimeout()
       
       try {
-        // Check for Google user session in localStorage first
-        if (typeof window !== 'undefined') {
-          const storedGoogleUser = localStorage.getItem('google_user')
-          const storedSession = localStorage.getItem('auth_session')
-          
-          if (storedGoogleUser && storedSession) {
-            try {
-              const googleUser = JSON.parse(storedGoogleUser)
-              const session = JSON.parse(storedSession)
-              
-              // Create a profile object from stored data
-              const profile = {
-                id: googleUser.id,
-                name: googleUser.name,
-                email: googleUser.email,
-              }
-              
-              if (mounted) {
-                clearTimeout(timeoutId)
-                setAuthState({
-                  user: session.user,
-                  profile,
-                  session,
-                  loading: false,
-                  isAuthenticated: true,
-                })
-                return
-              }
-            } catch (parseError) {
-              console.error('Error parsing stored session:', parseError)
-              // Clear corrupted data
-              localStorage.removeItem('google_user')
-              localStorage.removeItem('auth_session')
-            }
-          }
-        }
-        
-        // Fallback to Supabase session
         if (!supabase) {
           if (mounted) {
             clearTimeout(timeoutId)
@@ -212,7 +162,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
-          console.error('AuthProvider: Error getting session:', error)
+          console.error('Error getting session:', error)
         }
 
         if (mounted) {
@@ -220,7 +170,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           await updateAuthState(session)
         }
       } catch (error) {
-        console.error('AuthProvider: Error initializing auth:', error)
+        console.error('Error initializing auth:', error)
         if (mounted) {
           clearTimeout(timeoutId)
           setAuthState(prev => ({ ...prev, loading: false }))
@@ -230,22 +180,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     initializeAuth()
 
-    // Listen for auth state changes
+    // Listen for auth state changes and handle token refresh
     let subscription: any = null;
+    let refreshInterval: NodeJS.Timeout | null = null;
+    
     if (supabase) {
       const { data } = supabase.auth.onAuthStateChange(
         async (event, session) => {
         if (!mounted) return
-
-        console.log('Auth state changed:', event, session?.user?.id)
         
         // Handle different auth events
         switch (event) {
           case 'SIGNED_IN':
+            await updateAuthState(session)
+            // Set up automatic token refresh
+            if (session && refreshInterval) {
+              clearInterval(refreshInterval)
+            }
+            if (session) {
+              // Refresh token 5 minutes before expiry
+              const refreshTime = (session.expires_in - 300) * 1000
+              refreshInterval = setInterval(async () => {
+                if (mounted) {
+                  await supabase.auth.refreshSession()
+                }
+              }, refreshTime)
+            }
+            break
           case 'TOKEN_REFRESHED':
             await updateAuthState(session)
             break
           case 'SIGNED_OUT':
+            if (refreshInterval) {
+              clearInterval(refreshInterval)
+              refreshInterval = null
+            }
             setAuthState({
               user: null,
               profile: null,
@@ -253,9 +222,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
               loading: false,
               isAuthenticated: false,
             })
-            break
-          case 'PASSWORD_RECOVERY':
-            // Handle password recovery if needed
             break
           default:
             await updateAuthState(session)
@@ -268,6 +234,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       mounted = false
       clearTimeout(timeoutId)
+      if (refreshInterval) {
+        clearInterval(refreshInterval)
+      }
       subscription?.unsubscribe()
     }
   }, [])
@@ -279,24 +248,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       if (!supabase) return { success: false, error: 'No supabase client' };
       
-      console.log('AuthProvider: Attempting sign in for:', email)
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) {
-        console.error('AuthProvider: Sign in error:', error)
         return { success: false, error }
       }
 
       if (data.session && data.user) {
-        console.log('AuthProvider: Sign in successful, updating auth state')
         await updateAuthState(data.session)
         return { success: true, data }
       } else {
-        console.error('AuthProvider: Sign in returned no session or user')
         return { success: false, error: { message: 'No session created' } }
       }
     } catch (error) {
@@ -337,93 +301,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
   /**
    * Sign in with Google OAuth
    */
-  const signInWithGoogle = async (redirectTo?: string, googleUser?: GoogleUser) => {
+  const signInWithGoogle = async (redirectTo?: string) => {
     try {
-      if (googleUser) {
-        // We have Google user data from the Google Sign-In
-        // Create a mock user session
-        const mockUser = {
-          id: googleUser.id,
-          email: googleUser.email,
-          user_metadata: {
-            name: googleUser.name,
-            avatar_url: googleUser.picture
-          }
-        }
-        
-        const mockSession: Session = {
-          user: mockUser as unknown as User,
-          access_token: 'google-access-token',
-          refresh_token: 'google-refresh-token',
-          expires_in: 3600,
-          token_type: 'bearer'
-        }
-        
-        // Update auth state immediately
-        await updateAuthState(mockSession)
-        
-        // Store in localStorage for persistence (compatible with supabase-fallback)
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('google_user', JSON.stringify(googleUser))
-          localStorage.setItem('auth_session', JSON.stringify(mockSession))
-          
-          // Also set the values that supabase-fallback expects
-          localStorage.setItem('isAuthenticated', 'true')
-          localStorage.setItem('currentUserId', googleUser.id)
-          
-          // Create user in the fallback DB structure
-          const usersDb = JSON.parse(localStorage.getItem('users_db') || '{}')
-          usersDb[googleUser.id] = {
-            id: googleUser.id,
-            email: googleUser.email,
-            name: googleUser.name,
-            created_at: new Date().toISOString()
-          }
-          localStorage.setItem('users_db', JSON.stringify(usersDb))
-          
-          // Create user profile
-          const profilesDb = JSON.parse(localStorage.getItem('user_profiles_db') || '{}')
-          if (!profilesDb[googleUser.id]) {
-            profilesDb[googleUser.id] = {
-              id: googleUser.id,
-              email: googleUser.email,
-              name: googleUser.name,
-              subscriptionStatus: 'trial',
-              trialEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-              questionsUsedToday: 0,
-              totalQuestions: 0,
-              streak: 0,
-              achievements: 0,
-              successRate: 0,
-              preferences: {},
-              created_at: new Date().toISOString()
-            }
-          }
-          localStorage.setItem('user_profiles_db', JSON.stringify(profilesDb))
-        }
-        
-        return { success: true, data: mockSession }
-      } else {
-        // Fallback to old OAuth flow (shouldn't be used)
       if (!supabase) return { success: false, error: 'No supabase client' };
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'consent',
-            },
-            scopes: 'openid profile email'
-          }
-        })
-
-        if (error) {
-          return { success: false, error }
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+          scopes: 'openid profile email'
         }
+      })
 
-        return { success: true, data }
+      if (error) {
+        console.error('Google OAuth error:', error)
+        return { success: false, error }
       }
+
+      return { success: true, data }
     } catch (error) {
       console.error('Google sign in error:', error)
       return { success: false, error }
@@ -435,20 +334,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const signOut = async () => {
     try {
-      // Clear authentication-related localStorage items only
-      if (typeof window !== 'undefined') {
-        const keysToRemove = [
-          'google_user',
-          'auth_session',
-          'isAuthenticated',
-          'currentUserId'
-        ]
-        
-        keysToRemove.forEach(key => {
-          localStorage.removeItem(key)
-        })
-      }
-      
       // Clear auth state immediately
       setAuthState({
         user: null,
@@ -458,13 +343,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated: false,
       })
       
-      if (!supabase) return { success: true } // Still successful if no supabase
+      if (!supabase) return { success: true }
       
       const { error } = await supabase.auth.signOut()
       
       if (error) {
         console.error('Supabase signOut error:', error)
-        // Don't fail the whole signout if Supabase fails
+        return { success: false, error }
       }
 
       return { success: true }

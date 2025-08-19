@@ -29,7 +29,7 @@ interface FormErrors {
  */
 export function LoginForm({ redirectTo = '/dashboard', className = '' }: LoginFormProps) {
   const router = useRouter()
-  const { signIn, loading } = useAuth()
+  const { signIn, signInWithGoogle, loading } = useAuth()
   
   const [formData, setFormData] = useState<FormData>({
     email: '',
@@ -125,24 +125,21 @@ export function LoginForm({ redirectTo = '/dashboard', className = '' }: LoginFo
     )
   }
 
-  const handleGoogleSignIn = () => {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '777077022330-saogm3dkf5ufthfl0r5smvfkef71101o.apps.googleusercontent.com'
-    const redirectUri = `${window.location.origin}/auth/google/callback`
-    const scope = 'openid email profile'
-    const responseType = 'code'
-    const accessType = 'offline'
-    const prompt = 'select_account'
+  const handleGoogleSignIn = async () => {
+    setIsSubmitting(true)
     
-    const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      response_type: responseType,
-      scope: scope,
-      access_type: accessType,
-      prompt: prompt,
-    })
-    
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+    try {
+      const result = await signInWithGoogle(`${window.location.origin}/auth/callback`)
+      
+      if (!result.success) {
+        setErrors({ general: 'Google sign-in failed. Please try again.' })
+      }
+    } catch (error) {
+      console.error('Google sign-in error:', error)
+      setErrors({ general: 'Google sign-in failed. Please try again.' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (

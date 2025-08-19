@@ -2,9 +2,9 @@
 
 import { useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../../../lib/supabase';
+import { supabase } from '../../../lib/supabase';
 
-function GoogleCallbackContent() {
+function AuthCallbackContent() {
   const router = useRouter();
 
   useEffect(() => {
@@ -15,17 +15,17 @@ function GoogleCallbackContent() {
           return;
         }
 
-        // Get the session from the URL fragments that Supabase OAuth sets
+        // Handle the OAuth callback - Supabase automatically processes the session
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error getting session after OAuth:', error);
-          router.push('/login?error=session_error');
+          console.error('Error during OAuth callback:', error);
+          router.push('/login?error=auth_error');
           return;
         }
 
         if (data.session) {
-          // User successfully authenticated, create/update user profile
+          // User successfully authenticated
           const user = data.session.user;
           
           // Check if user exists in our database, if not create them
@@ -57,11 +57,11 @@ function GoogleCallbackContent() {
           // Redirect to dashboard
           router.push('/dashboard');
         } else {
-          // No session found, redirect to login
+          // No session found
           router.push('/login?error=no_session');
         }
       } catch (error) {
-        console.error('OAuth callback error:', error);
+        console.error('Auth callback error:', error);
         router.push('/login?error=callback_failed');
       }
     }
@@ -73,13 +73,13 @@ function GoogleCallbackContent() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Completing sign in with Google...</p>
+        <p className="mt-4 text-gray-600">Completing authentication...</p>
       </div>
     </div>
   );
 }
 
-export default function GoogleCallbackPage() {
+export default function AuthCallbackPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -89,7 +89,7 @@ export default function GoogleCallbackPage() {
         </div>
       </div>
     }>
-      <GoogleCallbackContent />
+      <AuthCallbackContent />
     </Suspense>
   );
 }

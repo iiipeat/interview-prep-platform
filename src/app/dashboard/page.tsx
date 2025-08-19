@@ -83,80 +83,69 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const loadUserData = async () => {
-    console.log('🔄 Starting loadUserData...');
-    
     try {
       setLoading(true);
       
-      // Add a small delay to ensure localStorage is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Check authentication - both Supabase and localStorage
-      let currentUser: any = null;
-      let userId: string | null = null;
-      
-      // First, check localStorage for authentication (OAuth users)
-      const isLocalAuth = localStorage.getItem('isAuthenticated') === 'true';
-      const localUserId = localStorage.getItem('currentUserId');
-      const localUserData = localStorage.getItem('user');
-      
-      console.log('🔍 Auth check:', { isLocalAuth, localUserId: !!localUserId, localUserData: !!localUserData });
-      
-      if (isLocalAuth && localUserId && localUserData) {
-        // User is authenticated via localStorage (OAuth)
-        try {
-          currentUser = JSON.parse(localUserData);
-          userId = localUserId;
-          console.log('✅ Found localStorage auth:', currentUser.email);
-        } catch (parseError) {
-          console.error('❌ Error parsing localStorage user data:', parseError);
-        }
-      } else if (supabase) {
-        // Fallback to Supabase auth
-        console.log('🔍 Checking Supabase auth...');
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (user) {
-          currentUser = user;
-          userId = user.id;
-          console.log('✅ Found Supabase auth:', user.email);
-        } else if (error) {
-          console.log('❌ Supabase auth error:', error);
-        }
-      }
-      
-      if (!currentUser || !userId) {
-        console.log('❌ No authentication found, redirecting to welcome');
-        setLoading(false); // Important: clear loading before redirect
-        router.push('/welcome');
+      // Check Supabase authentication only
+      if (!supabase) {
+        setLoading(false);
+        router.push('/login');
         return;
       }
       
-      // Get user profile from database (mock for now)
-      const dbProfile: any = null; // await supabaseHelpers.getUserProfile(userId);
+      const { data: { user }, error } = await supabase.auth.getUser();
       
-      // Use mock profile data for now
-      const mockProfile: UserProfile = {
-        id: userId,
-        name: currentUser.name || currentUser.email?.split('@')[0] || 'User',
-        email: currentUser.email,
-        subscriptionStatus: 'trial',
-        promptsUsedToday: 0,
-        dailyPromptLimit: 5, // Free trial limit
-        totalQuestions: 0,
-        streak: 0,
-        achievements: 0,
-        successRate: 0,
-        hasCompletedOnboarding: false,
-        trialEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
-        preferences: {
-          industry: '',
-          experienceLevel: 'entry',
-          targetRole: ''
+      if (error || !user) {
+        setLoading(false);
+        router.push('/login');
+        return;
+      }
+      
+      const currentUser = user;
+      const userId = user.id;
+      
+      // Get user profile from database
+      let { data: dbProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      // If no profile exists, create one
+      if (profileError && profileError.code === 'PGRST116') {
+        const newProfile = {
+          id: userId,
+          email: currentUser.email,
+          name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email?.split('@')[0] || 'User',
+          subscriptionStatus: 'trial',
+          promptsUsedToday: 0,
+          dailyPromptLimit: 5,
+          totalQuestions: 0,
+          streak: 0,
+          achievements: 0,
+          successRate: 0,
+          hasCompletedOnboarding: false,
+          trialEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          preferences: {
+            industry: '',
+            experienceLevel: 'entry',
+            targetRole: ''
+          },
+          created_at: new Date().toISOString()
+        };
+        
+        const { data: insertedProfile, error: insertError } = await supabase
+          .from('user_profiles')
+          .insert(newProfile)
+          .select()
+          .single();
+          
+        if (!insertError) {
+          dbProfile = insertedProfile;
         }
-      };
+      }
       
       if (dbProfile) {
-        // Use database profile if available
         setProfile(dbProfile);
         
         // Check if user needs onboarding
@@ -183,83 +172,28 @@ export default function DashboardPage() {
           setExperienceLevel(dbProfile.preferences.experienceLevel || '');
           setInterviewGoal(dbProfile.preferences.targetRole || '');
         }
-      } else {
-        // Use mock profile
-        console.log('📝 Using mock profile for user:', currentUser.email);
-        setProfile(mockProfile);
-        
-        // Calculate trial days remaining (7 days for new users)
-        const trialEnd = new Date(mockProfile.trialEndDate!);
-        const now = new Date();
-        const remaining = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-        setDaysRemaining(remaining);
-        
-        // Show onboarding for new users
-        setShowOnboarding(true);
       }
       
-      // Get recent sessions (mock for now)
-      const sessions: any[] = []; // await supabaseHelpers.getUserSessions(userId, 5);
-      setRecentSessions(sessions);
-      
-      console.log('✅ Dashboard data loaded successfully');
+      // Get recent sessions
+      const { data: sessions } = await supabase
+        .from('practice_sessions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+        
+      setRecentSessions(sessions || []);
       
     } catch (error) {
-      console.error('❌ Error loading user data:', error);
-      // Still set loading to false even on error
+      console.error('Error loading user data:', error);
     } finally {
-      console.log('🏁 Setting loading to false');
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    console.log('🎯 Dashboard useEffect triggered');
-    
-    // Check for OAuth success parameters first
-    const urlParams = new URLSearchParams(window.location.search);
-    const authSuccess = urlParams.get('auth');
-    const userParam = urlParams.get('user');
-    
-    if (authSuccess === 'success' && userParam) {
-      console.log('✅ OAuth success detected, setting up user');
-      try {
-        const userData = JSON.parse(userParam);
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('currentUserId', userData.id);
-        localStorage.setItem('user', JSON.stringify(userData));
-        console.log('✅ User data stored:', userData.email);
-        
-        // Clean URL
-        window.history.replaceState({}, '', '/dashboard');
-      } catch (error) {
-        console.error('❌ Error parsing OAuth user data:', error);
-      }
-    }
-    
-    // Small delay to ensure the page is fully mounted
-    const timer = setTimeout(() => {
-      loadUserData();
-    }, 50);
-    
-    // Fallback timer to force clear loading state after 10 seconds
-    const fallbackTimer = setTimeout(() => {
-      if (loading) {
-        console.log('⚠️ Forcing loading state to false after timeout');
-        setLoading(false);
-      }
-    }, 10000);
-    
-    // Check for welcome flag
-    if (urlParams.get('welcome') === 'true') {
-      setShowOnboarding(true);
-    }
-    
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(fallbackTimer);
-    };
-  }, []); // Empty dependency array to run only once
+    loadUserData();
+  }, []);
 
   // Get subscription limits for simplified model
   const getSubscriptionLimits = () => {
@@ -274,18 +208,21 @@ export default function DashboardPage() {
 
   const handleOnboardingComplete = async () => {
     try {
-      if (profile.id) {
-        // await supabaseHelpers.updateUserProfile(profile.id, {
-        //   hasCompletedOnboarding: true,
-        //   preferences: {
-        //     industry: selectedIndustry,
-        //     experienceLevel: experienceLevel,
-        //     targetRole: interviewGoal
-        //   }
-        // });
+      if (profile.id && supabase) {
+        await supabase
+          .from('user_profiles')
+          .update({
+            hasCompletedOnboarding: true,
+            preferences: {
+              industry: selectedIndustry,
+              experienceLevel: experienceLevel,
+              targetRole: interviewGoal
+            }
+          })
+          .eq('id', profile.id);
       }
       setShowOnboarding(false);
-      await loadUserData(); // Reload to get updated profile
+      await loadUserData();
     } catch (error) {
       console.error('Error saving onboarding:', error);
     }

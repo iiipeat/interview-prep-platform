@@ -278,18 +278,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     try {
       if (!supabase) return { success: false, error: 'No supabase client' };
+      
+      console.log('AuthProvider: Attempting sign in for:', email)
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) {
+        console.error('AuthProvider: Sign in error:', error)
         return { success: false, error }
       }
 
-      return { success: true, data }
+      if (data.session && data.user) {
+        console.log('AuthProvider: Sign in successful, updating auth state')
+        await updateAuthState(data.session)
+        return { success: true, data }
+      } else {
+        console.error('AuthProvider: Sign in returned no session or user')
+        return { success: false, error: { message: 'No session created' } }
+      }
     } catch (error) {
-      console.error('Sign in error:', error)
+      console.error('AuthProvider: Sign in error:', error)
       return { success: false, error }
     }
   }

@@ -15,11 +15,14 @@ export default function Home() {
   useEffect(() => {
     // Check authentication status once loading is complete
     if (!loading) {
+      console.log('Page: Checking auth status', { user: !!user, isAuthenticated, loading })
+      
       // Check localStorage for authentication (fallback for OAuth and test login)
       const localAuth = localStorage.getItem('isAuthenticated') === 'true';
       const localUser = localStorage.getItem('user');
       
       if (localAuth && localUser) {
+        console.log('Page: Found local auth, setting up local user')
         setIsLocalAuth(true);
         try {
           const userData = JSON.parse(localUser);
@@ -28,6 +31,7 @@ export default function Home() {
           setUserName('User');
         }
       } else if (user && isAuthenticated) {
+        console.log('Page: Found Supabase user, setting up authenticated user')
         // Use authenticated user's name
         const name = user.user_metadata?.full_name || 
                      user.user_metadata?.name || 
@@ -35,6 +39,7 @@ export default function Home() {
                      'User';
         setUserName(name);
       } else {
+        console.log('Page: No authentication found, redirecting to welcome')
         // Only redirect if truly not authenticated
         router.push('/welcome');
       }

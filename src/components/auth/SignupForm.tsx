@@ -213,8 +213,16 @@ export function SignupForm({ redirectTo = '/dashboard', className = '' }: Signup
       )
 
       if (result.success) {
-        // Show success message and redirect or wait for email confirmation
-        router.push('/auth/verify-email?email=' + encodeURIComponent(formData.email))
+        // Account created successfully, now sign the user in automatically
+        const loginResult = await signIn(formData.email, formData.password)
+        
+        if (loginResult.success) {
+          // Successfully signed in, redirect to dashboard
+          router.push('/dashboard')
+        } else {
+          // Account was created but auto-login failed, redirect to verify page
+          router.push('/auth/verify-email?email=' + encodeURIComponent(formData.email))
+        }
       } else {
         const errorMessage = result.error?.message || 'Registration failed'
         

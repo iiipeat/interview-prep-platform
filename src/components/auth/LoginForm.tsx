@@ -92,7 +92,8 @@ export function LoginForm({ redirectTo = '/dashboard', className = '' }: LoginFo
       const result = await signIn(formData.email, formData.password)
 
       if (result.success) {
-        router.push(redirectTo)
+        // Successful login, redirect to dashboard
+        router.push('/dashboard')
       } else {
         // Handle different types of errors
         const errorMessage = result.error?.message || 'Login failed'

@@ -534,31 +534,6 @@ export async function signOut() {
   }
 }
 
-/**
- * Helper function for Google OAuth sign in
- */
-export async function signInWithGoogle(redirectTo?: string) {
-  try {
-    if (!supabase) return { data: null, error: { message: 'Supabase not initialized' } }
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        },
-        scopes: 'openid profile email'
-      }
-    })
-    
-    if (error) throw error
-    return { success: true, data }
-  } catch (error) {
-    console.error('Error signing in with Google:', error)
-    return { success: false, error }
-  }
-}
 
 /**
  * Helper function for email/password sign up with trial setup

@@ -24,7 +24,6 @@ interface AuthState {
 interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: any }>
   signUp: (email: string, password: string, fullName: string, profileData?: any) => Promise<{ success: boolean; error?: any }>
-  signInWithGoogle: (redirectTo?: string) => Promise<{ success: boolean; error?: any }>
   signOut: () => Promise<{ success: boolean; error?: any }>
   resetPassword: (email: string) => Promise<{ success: boolean; error?: any }>
   refreshProfile: () => Promise<void>
@@ -298,36 +297,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  /**
-   * Sign in with Google OAuth
-   */
-  const signInWithGoogle = async (redirectTo?: string) => {
-    try {
-      if (!supabase) return { success: false, error: 'No supabase client' };
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-          scopes: 'openid profile email'
-        }
-      })
-
-      if (error) {
-        console.error('Google OAuth error:', error)
-        return { success: false, error }
-      }
-
-      return { success: true, data }
-    } catch (error) {
-      console.error('Google sign in error:', error)
-      return { success: false, error }
-    }
-  }
 
   /**
    * Sign out user
@@ -394,7 +363,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     ...authState,
     signIn,
     signUp,
-    signInWithGoogle,
     signOut,
     resetPassword,
     refreshProfile,

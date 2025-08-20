@@ -7,7 +7,6 @@ import { GlassCard } from '../ui/GlassCard'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { useAuth } from './AuthProvider'
-import { GoogleSignInButton } from './GoogleSignInButton'
 
 interface SignupFormProps {
   redirectTo?: string
@@ -67,7 +66,7 @@ const COMMON_INDUSTRIES = [
  */
 export function SignupForm({ redirectTo = '/dashboard', className = '' }: SignupFormProps) {
   const router = useRouter()
-  const { signUp, signIn, signInWithGoogle, loading } = useAuth()
+  const { signUp, signIn, loading } = useAuth()
   
   const [step, setStep] = useState<'basic' | 'profile'>('basic')
   const [formData, setFormData] = useState<FormData>({
@@ -289,24 +288,6 @@ export function SignupForm({ redirectTo = '/dashboard', className = '' }: Signup
 
         {step === 'basic' && (
           <>
-            {/* Google OAuth Button */}
-            <GoogleSignInButton
-              text="signup_with"
-              disabled={isSubmitting}
-              className="mb-6"
-            />
-
-            {/* Divider */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-gray-700" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-900 text-gray-500">
-                  or continue with email
-                </span>
-              </div>
-            </div>
 
             {/* Basic Form */}
             <form onSubmit={handleBasicSubmit} className="space-y-4">

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { GlassCard, Button, Navigation } from '../../components/ui';
 import { ProgressTracker } from '../../components/feedback';
+import { useAuth } from '../../components/auth/AuthProvider';
 import { supabase } from '../../lib/supabase';
 import { 
   Target, 
@@ -63,6 +64,7 @@ const INDUSTRIES = [
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user, profile: authProfile, loading: authLoading, isAuthenticated } = useAuth();
   const [profile, setProfile] = useState<UserProfile>({
     subscriptionStatus: 'trial',
     promptsUsedToday: 0,
@@ -86,16 +88,8 @@ export default function DashboardPage() {
     try {
       setLoading(true);
       
-      // Check Supabase authentication only
-      if (!supabase) {
-        setLoading(false);
-        router.push('/login');
-        return;
-      }
-      
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error || !user) {
+      // Use auth context instead of direct Supabase check
+      if (!isAuthenticated || !user) {
         setLoading(false);
         router.push('/login');
         return;
@@ -105,6 +99,11 @@ export default function DashboardPage() {
       const userId = user.id;
       
       // Get user profile from database
+      if (!supabase) {
+        setLoading(false);
+        return;
+      }
+      
       let { data: dbProfile, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
@@ -192,8 +191,11 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    loadUserData();
-  }, []);
+    // Only load data when auth state is ready
+    if (!authLoading) {
+      loadUserData();
+    }
+  }, [authLoading, isAuthenticated, user]);
 
   // Get subscription limits for simplified model
   const getSubscriptionLimits = () => {
@@ -238,7 +240,7 @@ export default function DashboardPage() {
 
   const limits = getSubscriptionLimits();
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
         <Navigation />

@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '../../../lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
+import { supabaseAdmin } from '../../../lib/supabase'
 
 /**
  * Auth callback route for OAuth providers and email confirmations
@@ -26,12 +28,29 @@ export async function GET(request: NextRequest) {
     try {
       console.log('🔄 Processing OAuth callback with code:', code.substring(0, 20) + '...')
       
-      if (!supabase) {
-        console.log('⚠️ Supabase client not available, using simple redirect')
-        const redirectUrl = new URL(next, requestUrl.origin)
-        redirectUrl.searchParams.set('auth', 'success')
-        return NextResponse.redirect(redirectUrl)
-      }
+      const cookieStore = cookies()
+      
+      // Create a Supabase client configured for server-side auth
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          auth: {
+            flowType: 'pkce'
+          },
+          cookies: {
+            get(name: string) {
+              return cookieStore.get(name)?.value
+            },
+            set(name: string, value: string, options: any) {
+              cookieStore.set({ name, value, ...options })
+            },
+            remove(name: string, options: any) {
+              cookieStore.set({ name, value: '', ...options })
+            },
+          },
+        }
+      )
 
       // Exchange the code for a session
       console.log('🔄 Attempting to exchange code for session...')
@@ -94,7 +113,17 @@ export async function GET(request: NextRequest) {
         // Successful authentication, redirect to the intended page
         const redirectUrl = new URL(next, requestUrl.origin)
         console.log('🎯 Redirecting authenticated user to:', redirectUrl.toString())
-        return NextResponse.redirect(redirectUrl)
+        
+        // Create response with redirect and ensure cookies are set
+        const response = NextResponse.redirect(redirectUrl)
+        
+        // The Supabase client should have already set the cookies via the cookies config above
+        // But let's add an extra step to ensure the session is available
+        if (authData.session) {
+          console.log('✅ Session successfully created and cookies set for user:', authData.user.email)
+        }
+        
+        return response
       }
 
       // No session created

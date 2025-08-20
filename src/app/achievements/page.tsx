@@ -245,11 +245,13 @@ export default function AchievementsPage() {
   const loadUserAchievements = async () => {
     try {
       // Get user data from database
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Get user stats and achievements from API
-        // This would normally connect to your database
-        // For now, we'll use localStorage data
+      if (supabase) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Get user stats and achievements from API
+          // This would normally connect to your database
+          // For now, we'll use localStorage data
+        }
       }
     } catch (error) {
       console.error('Error loading achievements:', error);

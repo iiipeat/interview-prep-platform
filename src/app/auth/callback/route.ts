@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { supabaseAdmin } from '../../../lib/supabase'
 
@@ -28,29 +28,8 @@ export async function GET(request: NextRequest) {
     try {
       console.log('🔄 Processing OAuth callback with code:', code.substring(0, 20) + '...')
       
-      const cookieStore = cookies()
-      
-      // Create a Supabase client configured for server-side auth
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          auth: {
-            flowType: 'pkce'
-          },
-          cookies: {
-            get(name: string) {
-              return cookieStore.get(name)?.value
-            },
-            set(name: string, value: string, options: any) {
-              cookieStore.set({ name, value, ...options })
-            },
-            remove(name: string, options: any) {
-              cookieStore.set({ name, value: '', ...options })
-            },
-          },
-        }
-      )
+      // Create a Supabase client configured for server-side auth with cookies
+      const supabase = createRouteHandlerClient({ cookies })
 
       // Exchange the code for a session
       console.log('🔄 Attempting to exchange code for session...')

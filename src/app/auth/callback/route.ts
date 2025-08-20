@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '../../../lib/supabase'
+import { supabase, supabaseAdmin } from '../../../lib/supabase'
 
 /**
  * Auth callback route for OAuth providers and email confirmations
@@ -28,9 +26,6 @@ export async function GET(request: NextRequest) {
     try {
       console.log('🔄 Processing OAuth callback with code:', code.substring(0, 20) + '...')
       
-      // Use Supabase to exchange the code for a session
-      const supabase = createRouteHandlerClient({ cookies })
-      
       if (!supabase) {
         console.log('⚠️ Supabase client not available, using simple redirect')
         const redirectUrl = new URL(next, requestUrl.origin)
@@ -39,12 +34,18 @@ export async function GET(request: NextRequest) {
       }
 
       // Exchange the code for a session
+      console.log('🔄 Attempting to exchange code for session...')
       const { data: authData, error: authError } = await supabase.auth.exchangeCodeForSession(code)
       
       if (authError) {
-        console.error('❌ Failed to exchange code for session:', authError)
+        console.error('❌ Failed to exchange code for session:', {
+          error: authError,
+          message: authError.message,
+          status: authError.status,
+          details: authError
+        })
         const errorUrl = new URL('/login', requestUrl.origin)
-        errorUrl.searchParams.set('error', 'Authentication failed. Please try again.')
+        errorUrl.searchParams.set('error', `OAuth failed: ${authError.message || 'Authentication failed. Please try again.'}`)
         return NextResponse.redirect(errorUrl)
       }
 
@@ -100,9 +101,13 @@ export async function GET(request: NextRequest) {
       throw new Error('No session created')
 
     } catch (error) {
-      console.error('❌ Auth callback error:', error)
+      console.error('❌ Auth callback error:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
       const errorUrl = new URL('/login', requestUrl.origin)
-      errorUrl.searchParams.set('error', 'Authentication failed. Please try again.')
+      errorUrl.searchParams.set('error', `Callback error: ${error instanceof Error ? error.message : 'Authentication failed. Please try again.'}`)
       return NextResponse.redirect(errorUrl)
     }
   }

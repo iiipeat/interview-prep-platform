@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Button } from '../ui/Button'
-import { supabase } from '../../lib/supabase'
+import { useAuth } from './AuthProvider'
 
 interface GoogleSignInButtonProps {
   text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin'
@@ -15,25 +15,17 @@ export function GoogleSignInButton({
   className = '',
   disabled = false
 }: GoogleSignInButtonProps) {
+  const { signInWithGoogle } = useAuth()
   
   const handleGoogleSignIn = async () => {
     if (disabled) return
     
     try {
-      if (!supabase) return;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'select_account',
-          }
-        }
-      })
+      console.log('🔄 Starting Google OAuth flow...')
+      const result = await signInWithGoogle(`${window.location.origin}/auth/callback`)
       
-      if (error) {
-        console.error('Error signing in with Google:', error)
+      if (!result.success && result.error) {
+        console.error('Error signing in with Google:', result.error)
       }
     } catch (error) {
       console.error('Error:', error)
